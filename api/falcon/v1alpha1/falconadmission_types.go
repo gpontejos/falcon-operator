@@ -6,14 +6,39 @@ import (
 	arv1 "k8s.io/api/admissionregistration/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
-const (
-	DeployWatcherDefault     = true
-	SnapshotsEnabledDefault  = true
-	SnapshotsIntervalDefault = 22
-	WatcherEnabledDefault    = true
+var (
+	DeployWatcherDefault               bool                   = true
+	SnapshotsEnabledDefault            bool                   = true
+	SnapshotsIntervalDefault           time.Duration          = 22 * time.Hour
+	WatcherEnabledDefault              bool                   = true
+	APDDefault                         bool                   = false
+	APDDefaultTrace                    string                 = "none"
+	KACNamespaceDefault                string                 = "falcon-kac"
+	KACResQuotaPodLimitDefault         string                 = "2"
+	KACPortDefault                     int32                  = 443
+	KACContainerPortDefault            int32                  = 4443
+	KACFailurePolicyDefault            arv1.FailurePolicyType = "Ignore"
+	KACReplicasDefault                 int32                  = 2
+	KACImagePullPolicyDefault          corev1.PullPolicy      = "Always"
+	KACResourcesClientLimitCpuDefault  string                 = "750m"
+	KACResourcesClientLimitMemDefault  string                 = "384Mi"
+	KACResourcesClientReqCpuDefault    string                 = "500m"
+	KACResourcesClientReqMemDefault    string                 = "384Mi"
+	KACResourcesAcLimitCpuDefault      string                 = "750m"
+	KACResourcesAcLimitMemDefault      string                 = "384Mi"
+	KACResourcesAcReqCpuDefault        string                 = "500m"
+	KACResourcesAcReqMemDefault        string                 = "384Mi"
+	KACResourcesWatcherLimitCpuDefault string                 = "300m"
+	KACResourcesWatcherLimitMemDefault string                 = "256Mi"
+	KACResourcesWatcherReqCpuDefault   string                 = "300m"
+	KACResourcesWatcherReqMemDefault   string                 = "256Mi"
+	KACDepUpdateStrategyMaxUnvailable  int32                  = 0
+	KACDepUpdateStrategyMaxSurge       int32                  = 1
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
@@ -255,7 +280,7 @@ func (watcher FalconAdmissionConfigSpec) GetSnapshotsEnabled() bool {
 
 func (watcher FalconAdmissionConfigSpec) GetSnapshotsInterval() time.Duration {
 	if watcher.SnapshotsInterval == nil {
-		return SnapshotsIntervalDefault * time.Hour
+		return time.Duration(SnapshotsIntervalDefault)
 	}
 
 	return watcher.SnapshotsInterval.Duration
@@ -267,4 +292,72 @@ func (watcher FalconAdmissionConfigSpec) GetWatcherEnabled() bool {
 	}
 
 	return *watcher.WatcherEnabled
+}
+
+func (admission FalconAdmission) GetInstallNamespace() string {
+	if admission.Spec.InstallNamespace == "" {
+		return KACNamespaceDefault
+	}
+
+	return admission.Spec.InstallNamespace
+}
+
+func NewFalconAdmissionSpec() FalconAdmissionSpec {
+	return FalconAdmissionSpec{
+		InstallNamespace: KACNamespaceDefault,
+		Falcon: FalconSensor{
+			APD:   &APDDefault,
+			Trace: APDDefaultTrace,
+		},
+		ResQuota: FalconAdmissionRQSpec{
+			PodLimit: KACResQuotaPodLimitDefault,
+		},
+		AdmissionConfig: FalconAdmissionConfigSpec{
+			Port:              &KACPortDefault,
+			ContainerPort:     &KACContainerPortDefault,
+			FailurePolicy:     KACFailurePolicyDefault,
+			DeployWatcher:     &DeployWatcherDefault,
+			SnapshotsEnabled:  &SnapshotsEnabledDefault,
+			SnapshotsInterval: &metav1.Duration{Duration: SnapshotsIntervalDefault},
+			WatcherEnabled:    &WatcherEnabledDefault,
+			Replicas:          &KACReplicasDefault,
+			ImagePullPolicy:   KACImagePullPolicyDefault,
+			ResourcesClient: &corev1.ResourceRequirements{
+				Limits: corev1.ResourceList{
+					"cpu":    resource.MustParse(KACResourcesClientLimitCpuDefault),
+					"memory": resource.MustParse(KACResourcesClientLimitMemDefault),
+				},
+				Requests: corev1.ResourceList{
+					"cpu":    resource.MustParse(KACResourcesClientReqCpuDefault),
+					"memory": resource.MustParse(KACResourcesClientLimitMemDefault),
+				},
+			},
+			ResourcesWatcher: &corev1.ResourceRequirements{
+				Limits: corev1.ResourceList{
+					"cpu":    resource.MustParse(KACResourcesWatcherLimitCpuDefault),
+					"memory": resource.MustParse(KACResourcesWatcherLimitMemDefault),
+				},
+				Requests: corev1.ResourceList{
+					"cpu":    resource.MustParse(KACResourcesWatcherReqCpuDefault),
+					"memory": resource.MustParse(KACResourcesWatcherReqMemDefault),
+				},
+			},
+			ResourcesAC: &corev1.ResourceRequirements{
+				Limits: corev1.ResourceList{
+					"cpu":    resource.MustParse(KACResourcesAcLimitCpuDefault),
+					"memory": resource.MustParse(KACResourcesAcLimitMemDefault),
+				},
+				Requests: corev1.ResourceList{
+					"cpu":    resource.MustParse(KACResourcesAcReqCpuDefault),
+					"memory": resource.MustParse(KACResourcesAcReqMemDefault),
+				},
+			},
+			DepUpdateStrategy: FalconAdmissionUpdateStrategy{
+				RollingUpdate: appsv1.RollingUpdateDeployment{
+					MaxUnavailable: &intstr.IntOrString{IntVal: KACDepUpdateStrategyMaxUnvailable},
+					MaxSurge:       &intstr.IntOrString{IntVal: KACDepUpdateStrategyMaxSurge},
+				},
+			},
+		},
+	}
 }
