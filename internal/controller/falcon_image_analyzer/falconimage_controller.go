@@ -95,6 +95,8 @@ func (r *FalconImageAnalyzerReconciler) Reconcile(ctx context.Context, req ctrl.
 		return ctrl.Result{}, err
 	}
 
+	log.Info("image analyzer default spec", "falconImageAnalyzer.Spec", falconImageAnalyzer.Spec)
+
 	validate, err := k8sutils.CheckRunningPodLabels(r.Client, ctx, falconImageAnalyzer.Spec.InstallNamespace, common.CRLabels("deployment", falconImageAnalyzer.Name, common.FalconImageAnalyzer))
 	if err != nil {
 		return ctrl.Result{}, err

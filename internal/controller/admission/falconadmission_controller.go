@@ -106,6 +106,8 @@ func (r *FalconAdmissionReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		return ctrl.Result{}, err
 	}
 
+	log.Info("admission default spec", "falconAdmission.Spec", falconAdmission.Spec)
+
 	validate, err := k8sutils.CheckRunningPodLabels(r.Client, ctx, falconAdmission.Spec.InstallNamespace, common.CRLabels("deployment", falconAdmission.Name, common.FalconAdmissionController))
 	if err != nil {
 		return ctrl.Result{}, err

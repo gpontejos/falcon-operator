@@ -104,6 +104,8 @@ func (r *FalconContainerReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		return ctrl.Result{}, err
 	}
 
+	log.Info("container default spec", "falconContainer.Spec", falconContainer.Spec)
+
 	if len(falconContainer.Status.Conditions) == 0 {
 		err := r.StatusUpdate(ctx, req, log, falconContainer, falconv1alpha1.ConditionPending,
 			metav1.ConditionFalse,

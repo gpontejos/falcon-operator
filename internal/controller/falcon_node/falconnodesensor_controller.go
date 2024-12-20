@@ -106,6 +106,8 @@ func (r *FalconNodeSensorReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		return ctrl.Result{}, err
 	}
 
+	log.Info("node default spec", "nodesensor.Spec", nodesensor.Spec)
+
 	validate, err := k8sutils.CheckRunningPodLabels(r.Client, ctx, nodesensor.Spec.InstallNamespace, common.CRLabels("daemonset", nodesensor.Name, common.FalconKernelSensor))
 	if err != nil {
 		return ctrl.Result{}, err
