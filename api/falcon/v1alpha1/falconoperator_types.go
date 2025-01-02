@@ -29,6 +29,7 @@ type FalconOperatorSpec struct {
 	FalconAPI *FalconAPI `json:"falcon_api,omitempty"`
 
 	// Registry configures container image registry to which registry image will be pushed.
+	// +kubebuilder:default:={"type": "crowdstrike"}
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Registry Configuration for FalconAdmission, FalconImageanalyzer, and FalconContainer",order=3
 	Registry RegistrySpec `json:"registry,omitempty"`
 

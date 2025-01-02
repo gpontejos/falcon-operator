@@ -3430,6 +3430,8 @@ spec:
                     type: object
                 type: object
               registry:
+                default:
+                  type: crowdstrike
                 description: Registry configures container image registry to which
                   registry image will be pushed.
                 properties:
