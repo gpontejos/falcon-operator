@@ -1,10 +1,10 @@
 # Falcon Operator
 
 ## About FalconOperator Custom Resource (CR)
-Falcon Operator introduces the FalconOperator Custom Resource (CR) to the cluster. The resource is meant to install, configure, and uninstall any of the Falcon CRDs within a single manifest - FalconAdmission, FalconContainer, FalconImageAnalyzer, and FalconNodeSensor.
+Falcon Operator introduces the FalconOperator Custom Resource (CR) to the cluster. This resource is intended to simplify the installation, configuration, and removal of any of the Falcon CRDs within a single manifest - FalconAdmission, FalconContainer, FalconImageAnalyzer, and FalconNodeSensor.
 
 ### FalconOperator CR Configuration using CrowdStrike API Keys
-To start the FalconOperator installation using CrowdStrike API Keys to allow the operator to determine your Falcon Customer ID (CID) as well as pull down the CrowdStrike FalconAdmission, FalconContainer, FalconImageAnalyzer, or FalconImageAnalyzer image, please create the following FalconAdmission resource to your cluster.
+CrowdStrike API Keys are required to allow the operator to determine your Falcon Customer ID (CID) as well as pull the FalconAdmission, FalconContainer, FalconImageAnalyzer, or FalconNodeSensor images.
 
 > [!IMPORTANT]
 > You will need to provide CrowdStrike API Keys and CrowdStrike cloud region for the installation. It is recommended to establish new API credentials for the installation at https://falcon.crowdstrike.com/support/api-clients-and-keys, required permissions are:
@@ -54,7 +54,7 @@ The additional configurations for `falconNodeSensor`, `imageAnalyzer`, `falconCo
 | deployImageAnalyzer        | (Optional) Boolean to deploy the Image Analyzer. Default: True                                                                                 |
 | deployAdmissionController  | (Optional) Boolean to deploy the Admission Controller. Default: True                                                                           |
 | deployNodeSensor           | (Optional) Boolean to deploy Falcon Node Sensor. Default True                                                                                  |
-| deployFalconContainer      | (Optional) Boolean to deploy Falcon Container. Default: False                                                                                  |
+| deployFalconContainer      | (Optional) Boolean to deploy Falcon Container. Do not deploy the container sensor alongside the Node Sensor. Default: False                    |
 | falconNodeSensor           | (Optional) Additional configurations that map to FalconNodeSensorSpec. All values within the custom resource spec can be overridden here.      | 
 | imageAnalyzer              | (Optional) Additional configurations that map to FalconImageAnalyzerSpec. All values within the custom resource spec can be overridden here.   | 
 | falconContainer            | (Optional) Additional configurations that map to FalconContainerSpec. All values within the custom resource spec can be overridden here.       |
@@ -128,7 +128,7 @@ spec:
 > Multiple restarts for the Falcon Admission Controller Pods may occur when deploying alongside other resources. Falcon KAC is designed to ignore namespaces managed by CrowdStrike, so as new resources are added, such as Falcon Container or Falcon Node Sensor, the KAC pod will redeploy to ignore the new namespaces.
 
 ### Install Steps
-To install Falcon Admission Controller, run the following command to install the FalconAdmission CR:
+To install Falcon Admission Controller, run the following command to install the FalconOperator CR:
 ```sh
 kubectl create -f https://raw.githubusercontent.com/crowdstrike/falcon-operator/main/config/samples/falcon_v1alpha1_falconoperator.yaml --edit=true
 ```
@@ -140,9 +140,17 @@ To uninstall FalconOperator simply remove the FalconOperator resource. The opera
 kubectl delete falconoperator --all
 ``` 
 
-### Sensor upgrades
+Individual resources can be added or removed in-place by reapplying the manifest with the resource's deploy Spec field modified to true/false (deployImageAnalyzer, deployFalconContainer, deployAdmissionController, deployImageAnalyzer):
+```sh
+kubectl edit falconoperators
+```
 
-To upgrade the sensor version, simply add and/or update the `version` field in the FalconOperator resource and apply the change. Alternatively if the `image` field was used instead of using the Falcon API credentials, add and/or update the `image` field in the FalconAdmission resource and apply the change. The operator will detect the change and perform the upgrade.
+### Managed Resource Upgrades
+Documentation for required configuration changes for each Custom Resource can be found below:
+- FalconAdmission - https://github.com/CrowdStrike/falcon-operator/blob/main/docs/resources/admission/README.md#sensor-upgrades
+- FalconImageAnalyzer - https://github.com/CrowdStrike/falcon-operator/blob/main/docs/resources/imageanalyzer/README.md#sensor-upgrades
+- FalconContainer - https://github.com/CrowdStrike/falcon-operator/blob/main/docs/resources/container/README.md#sensor-upgrades
+- FalconNodeSensor - https://github.com/CrowdStrike/falcon-operator/blob/main/docs/resources/node/README.md#sensor-upgrades
 
 ### Troubleshooting
 
@@ -156,14 +164,3 @@ To upgrade the sensor version, simply add and/or update the `version` field in t
   ```sh
   kubectl -n falcon-operator logs -f deploy/falcon-operator-controller-manager -c manager
   ```
-
-### Additional Documentation
-End-to-end guide(s) to install falcon-operator together with FalconAdmission resource.
- - [Deployment Guide for AKS/ACR](../../deployment/azure/README.md)
- - [Deployment Guide for EKS/ECR](../../deployment/eks/README.md)
- - [Deployment Guide for EKS Fargate](../../deployment/eks-fargate/README.md)
- - [Deployment Guide for GKE/GCR](../../deployment/gke/README.md)
- - [Deployment Guide for OpenShift](../../deployment/openshift/README.md)
-
-
-
