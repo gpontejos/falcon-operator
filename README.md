@@ -25,6 +25,7 @@ The CrowdStrike Falcon Operator deploys CrowdStrike Falcon to the cluster. The o
 | [FalconImageAnalyzer](https://github.com/CrowdStrike/falcon-operator/tree/main/docs/resources/imageanalyzer/README.md) | Manages installation of Falcon Image Assessment at Runtime on the cluster |
 | [FalconContainer](https://github.com/CrowdStrike/falcon-operator/tree/main/docs/resources/container/README.md) | Manages installation of Falcon Container Sensor on the cluster   |
 | [FalconNodeSensor](https://github.com/CrowdStrike/falcon-operator/tree/main/docs/resources/node/README.md)     | Manages installation of Falcon Linux Sensor on the cluster nodes |
+| [FalconOperator](https://github.com/CrowdStrike/falcon-operator/tree/main/docs/resources/node/README.md)       | Deploys FalconAdmission, FalconImageAnalyzer, FalconContainer, and FalconNodeSensor CRs from a single manifest |
 
 
 ## Installation and Deployment
