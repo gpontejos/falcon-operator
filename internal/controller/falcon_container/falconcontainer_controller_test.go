@@ -91,7 +91,7 @@ var _ = Describe("FalconContainer controller", func() {
 			falconContainerReconciler := &FalconContainerReconciler{
 				Client:  k8sClient,
 				Scheme:  k8sClient.Scheme(),
-				tracker: tracker,
+				Tracker: tracker,
 			}
 
 			_, err = falconContainerReconciler.Reconcile(ctx, reconcile.Request{

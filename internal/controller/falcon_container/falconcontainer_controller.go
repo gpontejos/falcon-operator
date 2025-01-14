@@ -37,7 +37,7 @@ type FalconContainerReconciler struct {
 	Scheme          *runtime.Scheme
 	RestConfig      *rest.Config
 	reconcileObject func(client.Object)
-	tracker         sensorversion.Tracker
+	Tracker         sensorversion.Tracker
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -62,7 +62,7 @@ func (r *FalconContainerReconciler) SetupWithManager(mgr ctrl.Manager, tracker s
 		return err
 	}
 
-	r.tracker = tracker
+	r.Tracker = tracker
 	return nil
 }
 
@@ -93,7 +93,7 @@ func (r *FalconContainerReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 
 	if err := r.Get(ctx, req.NamespacedName, falconContainer); err != nil {
 		if errors.IsNotFound(err) {
-			r.tracker.StopTracking(req.NamespacedName)
+			r.Tracker.StopTracking(req.NamespacedName)
 
 			// Request object not found, could have been deleted after reconcile request.
 			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
@@ -154,9 +154,9 @@ func (r *FalconContainerReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 
 	if shouldTrackSensorVersions(falconContainer) {
 		getSensorVersion := sensorversion.NewFalconCloudQuery(falcon.SidecarSensor, r.falconApiConfig(ctx, falconContainer))
-		r.tracker.Track(req.NamespacedName, getSensorVersion, r.reconcileObjectWithName, falconContainer.Spec.Advanced.IsAutoUpdatingForced())
+		r.Tracker.Track(req.NamespacedName, getSensorVersion, r.reconcileObjectWithName, falconContainer.Spec.Advanced.IsAutoUpdatingForced())
 	} else {
-		r.tracker.StopTracking(req.NamespacedName)
+		r.Tracker.StopTracking(req.NamespacedName)
 	}
 
 	// Image being set will override other image based settings
