@@ -63,6 +63,7 @@ spec:
         - /manager
         args:
         - --leader-elect
+        imagePullPolicy: Never
         image: controller:latest
         name: manager
         env:
