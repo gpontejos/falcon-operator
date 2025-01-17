@@ -5,12 +5,12 @@ metadata:
   labels:
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/name: falcon-operator
-  name: falcon-operator-falcon-FalconOperator-viewer-role
+  name: falcon-operator-falcon-FalconDeployment-viewer-role
 rules:
 - apiGroups:
   - falcon.crowdstrike.com
   resources:
-  - falconoperators
+  - falcondeployments
   verbs:
   - get
   - list
@@ -18,6 +18,6 @@ rules:
 - apiGroups:
   - falcon.crowdstrike.com
   resources:
-  - falconoperators/status
+  - falcondeployments/status
   verbs:
   - get

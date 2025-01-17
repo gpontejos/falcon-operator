@@ -404,339 +404,8 @@ spec:
         displayName: Annotations
         path: injector.serviceAccount.annotations
       version: v1alpha1
-    - description: FalconImageAnalyzer is the Schema for the falconImageAnalyzers
-        API
-      displayName: Falcon Image Analyzer
-      kind: FalconImageAnalyzer
-      name: falconimageanalyzers.falcon.crowdstrike.com
-      specDescriptors:
-      - description: Falcon OAuth2 API Client ID
-        displayName: Client ID
-        path: falcon_api.client_id
-        x-descriptors:
-        - urn:alm:descriptor:com.tectonic.ui:password
-      - description: Configure a list of registries for the Falcon Image Analyzer
-          to ignore.
-        displayName: Exclusions List
-        path: imageAnalyzerConfig.exclusions.registries
-      - description: Name of the priority class to use.
-        displayName: Name of the Priority Class to use
-        path: imageAnalyzerConfig.priorityClass.name
-      - description: If neceeary, configure the registry credentials for the Falcon
-          Image Analyzer.
-        displayName: Registry Credentials
-        path: imageAnalyzerConfig.registryConfig.credentials
-      - description: Define annotations that will be passed down to Image Analyzer
-          service account. This is useful for passing along AWS IAM Role or GCP Workload
-          Identity.
-        displayName: Service Account Configuration
-        path: imageAnalyzerConfig.serviceAccount
-      - description: Define annotations that will be passed down to the Service Account.
-          This is useful for passing along AWS IAM Role or GCP Workload Identity.
-        displayName: Service Account Annotations
-        path: imageAnalyzerConfig.serviceAccount.annotations
-      - description: RollingUpdate is used to specify the strategy used to roll out
-          a deployment
-        displayName: Falcon Admisison Controller deployment update configuration
-        path: imageAnalyzerConfig.updateStrategy.rollingUpdate
-        x-descriptors:
-        - urn:alm:descriptor:com.tectonic.ui:updateStrategy
-      - description: Namespace where the Falcon Image Analyzer should be installed.
-          For best security practices, this should be a dedicated namespace that is
-          not used for any other purpose. It also should not be the same namespace
-          where the Falcon Operator or the Falcon Sensor is installed.
-        displayName: Install Namespace
-        path: installNamespace
-        x-descriptors:
-        - urn:alm:descriptor:io.kubernetes:Namespace
-      - description: Allow pushing to docker registries over HTTPS with failed TLS
-          verification. Note that this does not affect other TLS connections.
-        displayName: Skip Registry TLS Verification
-        path: registry.tls.insecure_skip_verify
-        x-descriptors:
-        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
-      - description: Type of container registry to be used
-        displayName: Registry Type
-        path: registry.type
-      - description: "FalconAPI configures connection from your local Falcon operator
-          to CrowdStrike Falcon platform. \n When configured, it will pull the sensor
-          from registry.crowdstrike.com and deploy the appropriate sensor to the cluster."
-        displayName: Falcon Platform API Configuration
-        path: falcon_api
-      - description: Falcon OAuth2 API Client Secret
-        displayName: Client Secret
-        path: falcon_api.client_secret
-        x-descriptors:
-        - urn:alm:descriptor:com.tectonic.ui:password
-      - description: Configure a list of namespaces for Image Analyzer to ignore.
-        displayName: Ignore Namespace List
-        path: imageAnalyzerConfig.exclusions.namespaces
-      - displayName: Falcon Image Analyzer Image Pull Policy
-        path: imageAnalyzerConfig.imagePullPolicy
-        x-descriptors:
-        - urn:alm:descriptor:com.tectonic.ui:imagePullPolicy
-      - description: TLS configures TLS connection for push of Falcon Container image
-          to the registry
-        displayName: Registry TLS Configuration
-        path: registry.tls
-      - description: Allow for users to provide a CA Cert Bundle, as either a string
-          or base64 encoded string
-        displayName: Registry CA Certificate Bundle; optionally (double) base64 encoded
-        path: registry.tls.caCertificate
-      - description: Cloud Region defines CrowdStrike Falcon Cloud Region to which
-          the operator will connect and register.
-        displayName: CrowdStrike Falcon Cloud Region
-        path: falcon_api.cloud_region
-      - description: ImagePullSecrets is an optional list of references to secrets
-          to use for pulling image from the image location.
-        displayName: Falcon Image Analyzer Image Pull Secrets
-        path: imageAnalyzerConfig.imagePullSecrets
-        x-descriptors:
-        - urn:alm:descriptor:io.kubernetes:Secret
-      - description: Azure Container Registry Name represents the name of the ACR
-          for the Falcon Container push. Only applicable to Azure cloud.
-        displayName: Azure Container Registry Name
-        path: registry.acr_name
-      - description: Allow for users to provide a ConfigMap containing a CA Cert Bundle
-          under a key ending in .crt
-        displayName: ConfigMap containing Registry CA Certificate Bundle
-        path: registry.tls.caCertificateConfigMap
-        x-descriptors:
-        - urn:alm:descriptor:com.tectonic.ui:selector:core:v1:ConfigMap
-      - description: Falcon Customer ID (CID) Override (optional, default is derived
-          from the API Key pair)
-        displayName: Falcon Customer ID (CID)
-        path: falcon_api.cid
-      - displayName: Falcon Image Analyzer Resources
-        path: imageAnalyzerConfig.resources
-        x-descriptors:
-        - urn:alm:descriptor:com.tectonic.ui:resourceRequirements
-      - description: Additional configuration for Falcon Image Analyzer deployment.
-        displayName: Falcon Image Analyzer Configuration
-        path: imageAnalyzerConfig
-      - displayName: Azure Config file path
-        path: imageAnalyzerConfig.azureConfigPath
-      - description: Enable priority class for the Falcon Image Analyzer deployment.
-        displayName: Priority Class
-        path: imageAnalyzerConfig.priorityClass
-      - description: Registry configures container image registry to which the Image
-          Analyzer image will be pushed.
-        displayName: Falcon Image Analyzer Registry Configuration
-        path: registry
-      - description: Location of the Image Analyzer image. Use only in cases when
-          you mirror the original image to your repository/name:tag
-        displayName: Falcon Image Analyzer Image URI
-        path: image
-      - description: Type of Deployment update. Can be "RollingUpdate" or "OnDelete".
-          Default is RollingUpdate.
-        displayName: Deployment Update Strategy
-        path: imageAnalyzerConfig.updateStrategy
-      - description: Set the falcon image analyzer volume size limit.
-        displayName: Falcon Image Analyzer Volume Size Limit
-        path: imageAnalyzerConfig.sizeLimit
-      - description: 'Falcon Image Analyzer Version. The latest version will be selected
-          when version specifier is missing. Example: 6.31, 6.31.0, 6.31.0-1409, etc.'
-        displayName: Falcon Image Analyzer Version
-        path: version
-      - description: Set the falcon image analyzer volume mount path.
-        displayName: Falcon Image Analyzer Volume Mount Path
-        path: imageAnalyzerConfig.mountPath
-      - description: Name of the Kubernetes Cluster.
-        displayName: Falcon Image Analyzer Cluster Name
-        path: imageAnalyzerConfig.clusterName
-      - description: Exclusions for the Falcon Image Analyzer.
-        displayName: Falcon Image Analyzer Exclusions
-        path: imageAnalyzerConfig.exclusions
-      - description: RegistryConfig for the Falcon Image Analyzer.
-        displayName: Falcon Image Analyzer Registry Configuration Options
-        path: imageAnalyzerConfig.registryConfig
-      - description: Enable debugging for the Falcon Image Analyzer.
-        displayName: Falcon Image Analyzer Enable Debugging
-        path: imageAnalyzerConfig.debug
-      version: v1alpha1
-    - description: FalconNodeSensor is the Schema for the falconnodesensors API
-      displayName: Falcon Node Sensor
-      kind: FalconNodeSensor
-      name: falconnodesensors.falcon.crowdstrike.com
-      specDescriptors:
-      - description: Falcon Customer ID (CID)
-        displayName: Falcon Customer ID (CID)
-        path: falcon.cid
-      - description: "FalconAPI configures connection from your local Falcon operator
-          to CrowdStrike Falcon platform. \n When configured, it will pull the sensor
-          from registry.crowdstrike.com and deploy the appropriate sensor to the cluster.
-          \n If using the API is not desired, the sensor can be manually configured."
-        displayName: Falcon Platform API Configuration
-        path: falcon_api
-      - description: Falcon OAuth2 API Client ID
-        displayName: Client ID
-        path: falcon_api.client_id
-        x-descriptors:
-        - urn:alm:descriptor:com.tectonic.ui:password
-      - description: Namespace where the Falcon Sensor should be installed. For best
-          security practices, this should be a dedicated namespace that is not used
-          for any other purpose. It also should not be the same namespace where the
-          Falcon Operator, or other Falcon resources are deployed.
-        displayName: Install Namespace
-        path: installNamespace
-        x-descriptors:
-        - urn:alm:descriptor:io.kubernetes:Namespace
-      - description: UpdatePolicy is the name of a sensor update policy configured
-          and enabled in Falcon UI. It is ignored when Image and/or Version are set.
-        displayName: Falcon Sensor Update Policy
-        path: node.advanced.updatePolicy
-      - description: ImagePullSecrets is an optional list of references to secrets
-          in the falcon-system namespace to use for pulling image from image_override
-          location.
-        displayName: Image Pull Secrets
-        path: node.imagePullSecrets
-      - displayName: Falcon Sensor Configuration
-        path: falcon
-      - description: Installation token that prevents unauthorized hosts from being
-          accidentally or maliciously added to your customer ID (CID).
-        displayName: Provisioning Token
-        path: falcon.provisioning_token
-      - description: Falcon OAuth2 API Client Secret
-        displayName: Client Secret
-        path: falcon_api.client_secret
-        x-descriptors:
-        - urn:alm:descriptor:com.tectonic.ui:password
-      - description: AutoUpdate determines whether to install new versions of the
-          sensor as they become available. Defaults to "off" and is ignored if FalconAPI
-          is not set. Setting this to "force" causes the reconciler to run on every
-          polling cycle, even if a new sensor version is not available. Setting it
-          to "normal" only reconciles when a new version is detected.
-        displayName: Falcon Sensor Automatic Updates
-        path: node.advanced.autoUpdate
-      - description: Location of the Falcon Sensor image. Use only in cases when you
-          mirror the original image to your repository/name:tag
-        displayName: Image
-        path: node.image
-      - description: Enables the operator to deploy a PriorityClass instead of rolling
-          your own. Default is false.
-        displayName: Deploy Priority Class to cluster
-        path: node.priorityClass.deploy
-      - description: Name of the priority class to use for the DaemonSet.
-        displayName: Name of the Priority Class to use
-        path: node.priorityClass.name
-      - description: Disable the Falcon Sensor's use of a proxy.
-        displayName: Disable Falcon Proxy
-        path: falcon.apd
-        x-descriptors:
-        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
-      - description: Cloud Region defines CrowdStrike Falcon Cloud Region to which
-          the operator will connect and register.
-        displayName: CrowdStrike Falcon Cloud Region
-        path: falcon_api.cloud_region
-      - description: Various configuration for DaemonSet Deployment
-        displayName: DaemonSet Configuration
-        path: node
-      - displayName: Image Pull Policy
-        path: node.imagePullPolicy
-      - description: Value of the priority class to use for the DaemonSet. Requires
-          the Deploy field to be set to true.
-        displayName: Priority Class Value
-        path: node.priorityClass.value
-      - description: The application proxy host to use for Falcon sensor proxy configuration.
-        displayName: Falcon Proxy Host
-        path: falcon.aph
-      - description: Falcon Customer ID (CID) Override (optional, default is derived
-          from the API Key pair)
-        displayName: Falcon Customer ID (CID)
-        path: falcon_api.cid
-      - description: Specifies tolerations for custom taints. Defaults to allowing
-          scheduling on all nodes.
-        displayName: Tolerations
-        path: node.tolerations
-      - description: The application proxy port to use for Falcon sensor proxy configuration.
-        displayName: Falcon Proxy Port
-        path: falcon.app
-        x-descriptors:
-        - urn:alm:descriptor:com.tectonic.ui:number
-      - description: Specifies node affinity for scheduling the DaemonSet. Defaults
-          to allowing scheduling on all nodes.
-        displayName: Node Affinity
-        path: node.nodeAffinity
-      - description: 'Sensor grouping tags are optional, user-defined identifiers
-          that can used to group and filter hosts. Allowed characters: all alphanumerics,
-          ''/'', ''-'', and ''_''.'
-        displayName: Sensor Grouping Tags
-        path: falcon.tags
-      - description: Type of DaemonSet update. Can be "RollingUpdate" or "OnDelete".
-          Default is RollingUpdate.
-        displayName: DaemonSet Update Strategy
-        path: node.updateStrategy
-      - description: Set sensor trace level.
-        displayName: Trace Level
-        path: falcon.trace
-      - description: Kills pod after a specificed amount of time (in seconds). Default
-          is 30 seconds.
-        displayName: Termination Grace Period
-        path: node.terminationGracePeriod
-      - description: Utilize default or Pay-As-You-Go billing.
-        displayName: Billing
-        path: falcon.billing
-      - description: Disables the cleanup of the sensor through DaemonSet on the nodes.
-          Disabling might have unintended consequences for certain operations such
-          as sensor downgrading.
-        displayName: Node Cleanup
-        path: node.disableCleanup
-      - description: Configure resource requests and limits for the DaemonSet Sensor.
-          Only applies when using the eBPF backend.
-        displayName: Falcon eBPF Sensor Resources
-        path: node.resources
-      - description: Enables the use of GKE Autopilot.
-        displayName: GKE Autopilot Settings
-        path: node.gke
-      - description: Enable priority class for the DaemonSet. This is useful for GKE
-          Autopilot clusters, but can be set for any cluster.
-        displayName: Priority Class
-        path: node.priorityClass
-      - description: Advanced configures various options that go against industry
-          practices or are otherwise not recommended for use. Adjusting these settings
-          may result in incorrect or undesirable behavior. Proceed at your own risk.
-          For more information, please see https://github.com/CrowdStrike/falcon-operator/blob/main/docs/ADVANCED.md.
-        displayName: DaemonSet Advanced Settings
-        path: node.advanced
-      - description: Enables the use of GKE Autopilot.
-        displayName: Enabled
-        path: node.gke.autopilot
-      - description: Sets the resource limits for the DaemonSet Sensor. Only applies
-          when using the eBPF backend.
-        displayName: Limits
-        path: node.resources.limits
-      - description: Minimum allowed is 250m.
-        displayName: CPU
-        path: node.resources.limits.cpu
-      - displayName: Ephemeral Storage
-        path: node.resources.limits.ephemeral-storage
-      - description: Minimum allowed is 500Mi.
-        displayName: Memory
-        path: node.resources.limits.memory
-      - description: Sets the resource requests for the DaemonSet Sensor. Only applies
-          when using the eBPF backend.
-        displayName: Requests
-        path: node.resources.requests
-      - description: Minimum allowed is 250m.
-        displayName: CPU
-        path: node.resources.requests.cpu
-      - displayName: Ephemeral Storage
-        path: node.resources.requests.ephemeral-storage
-      - description: Minimum allowed is 500Mi.
-        displayName: Memory
-        path: node.resources.requests.memory
-      - description: Add metadata to the DaemonSet Service Account for IAM roles.
-        displayName: Service Account
-        path: node.serviceAccount
-      - description: Define annotations that will be passed down to the Service Account.
-          This is useful for passing along AWS IAM Role or GCP Workload Identity.
-        displayName: Annotations
-        path: node.serviceAccount.annotations
-      - displayName: Type
-        path: node.updateStrategy.type
-      version: v1alpha1
     - description: FalconDeployment is the Schema for the falcondeployments API
-      displayName: Falcon Operator
+      displayName: Falcon Deployment
       kind: FalconDeployment
       name: falcondeployments.falcon.crowdstrike.com
       specDescriptors:
@@ -1503,6 +1172,337 @@ spec:
         path: falconNodeSensor.node.serviceAccount.annotations
       - displayName: Type
         path: falconNodeSensor.node.updateStrategy.type
+      version: v1alpha1
+    - description: FalconImageAnalyzer is the Schema for the falconImageAnalyzers
+        API
+      displayName: Falcon Image Analyzer
+      kind: FalconImageAnalyzer
+      name: falconimageanalyzers.falcon.crowdstrike.com
+      specDescriptors:
+      - description: Falcon OAuth2 API Client ID
+        displayName: Client ID
+        path: falcon_api.client_id
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:password
+      - description: Configure a list of registries for the Falcon Image Analyzer
+          to ignore.
+        displayName: Exclusions List
+        path: imageAnalyzerConfig.exclusions.registries
+      - description: Name of the priority class to use.
+        displayName: Name of the Priority Class to use
+        path: imageAnalyzerConfig.priorityClass.name
+      - description: If neceeary, configure the registry credentials for the Falcon
+          Image Analyzer.
+        displayName: Registry Credentials
+        path: imageAnalyzerConfig.registryConfig.credentials
+      - description: Define annotations that will be passed down to Image Analyzer
+          service account. This is useful for passing along AWS IAM Role or GCP Workload
+          Identity.
+        displayName: Service Account Configuration
+        path: imageAnalyzerConfig.serviceAccount
+      - description: Define annotations that will be passed down to the Service Account.
+          This is useful for passing along AWS IAM Role or GCP Workload Identity.
+        displayName: Service Account Annotations
+        path: imageAnalyzerConfig.serviceAccount.annotations
+      - description: RollingUpdate is used to specify the strategy used to roll out
+          a deployment
+        displayName: Falcon Admisison Controller deployment update configuration
+        path: imageAnalyzerConfig.updateStrategy.rollingUpdate
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:updateStrategy
+      - description: Namespace where the Falcon Image Analyzer should be installed.
+          For best security practices, this should be a dedicated namespace that is
+          not used for any other purpose. It also should not be the same namespace
+          where the Falcon Operator or the Falcon Sensor is installed.
+        displayName: Install Namespace
+        path: installNamespace
+        x-descriptors:
+        - urn:alm:descriptor:io.kubernetes:Namespace
+      - description: Allow pushing to docker registries over HTTPS with failed TLS
+          verification. Note that this does not affect other TLS connections.
+        displayName: Skip Registry TLS Verification
+        path: registry.tls.insecure_skip_verify
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
+      - description: Type of container registry to be used
+        displayName: Registry Type
+        path: registry.type
+      - description: "FalconAPI configures connection from your local Falcon operator
+          to CrowdStrike Falcon platform. \n When configured, it will pull the sensor
+          from registry.crowdstrike.com and deploy the appropriate sensor to the cluster."
+        displayName: Falcon Platform API Configuration
+        path: falcon_api
+      - description: Falcon OAuth2 API Client Secret
+        displayName: Client Secret
+        path: falcon_api.client_secret
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:password
+      - description: Configure a list of namespaces for Image Analyzer to ignore.
+        displayName: Ignore Namespace List
+        path: imageAnalyzerConfig.exclusions.namespaces
+      - displayName: Falcon Image Analyzer Image Pull Policy
+        path: imageAnalyzerConfig.imagePullPolicy
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:imagePullPolicy
+      - description: TLS configures TLS connection for push of Falcon Container image
+          to the registry
+        displayName: Registry TLS Configuration
+        path: registry.tls
+      - description: Allow for users to provide a CA Cert Bundle, as either a string
+          or base64 encoded string
+        displayName: Registry CA Certificate Bundle; optionally (double) base64 encoded
+        path: registry.tls.caCertificate
+      - description: Cloud Region defines CrowdStrike Falcon Cloud Region to which
+          the operator will connect and register.
+        displayName: CrowdStrike Falcon Cloud Region
+        path: falcon_api.cloud_region
+      - description: ImagePullSecrets is an optional list of references to secrets
+          to use for pulling image from the image location.
+        displayName: Falcon Image Analyzer Image Pull Secrets
+        path: imageAnalyzerConfig.imagePullSecrets
+        x-descriptors:
+        - urn:alm:descriptor:io.kubernetes:Secret
+      - description: Azure Container Registry Name represents the name of the ACR
+          for the Falcon Container push. Only applicable to Azure cloud.
+        displayName: Azure Container Registry Name
+        path: registry.acr_name
+      - description: Allow for users to provide a ConfigMap containing a CA Cert Bundle
+          under a key ending in .crt
+        displayName: ConfigMap containing Registry CA Certificate Bundle
+        path: registry.tls.caCertificateConfigMap
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:selector:core:v1:ConfigMap
+      - description: Falcon Customer ID (CID) Override (optional, default is derived
+          from the API Key pair)
+        displayName: Falcon Customer ID (CID)
+        path: falcon_api.cid
+      - displayName: Falcon Image Analyzer Resources
+        path: imageAnalyzerConfig.resources
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:resourceRequirements
+      - description: Additional configuration for Falcon Image Analyzer deployment.
+        displayName: Falcon Image Analyzer Configuration
+        path: imageAnalyzerConfig
+      - displayName: Azure Config file path
+        path: imageAnalyzerConfig.azureConfigPath
+      - description: Enable priority class for the Falcon Image Analyzer deployment.
+        displayName: Priority Class
+        path: imageAnalyzerConfig.priorityClass
+      - description: Registry configures container image registry to which the Image
+          Analyzer image will be pushed.
+        displayName: Falcon Image Analyzer Registry Configuration
+        path: registry
+      - description: Location of the Image Analyzer image. Use only in cases when
+          you mirror the original image to your repository/name:tag
+        displayName: Falcon Image Analyzer Image URI
+        path: image
+      - description: Type of Deployment update. Can be "RollingUpdate" or "OnDelete".
+          Default is RollingUpdate.
+        displayName: Deployment Update Strategy
+        path: imageAnalyzerConfig.updateStrategy
+      - description: Set the falcon image analyzer volume size limit.
+        displayName: Falcon Image Analyzer Volume Size Limit
+        path: imageAnalyzerConfig.sizeLimit
+      - description: 'Falcon Image Analyzer Version. The latest version will be selected
+          when version specifier is missing. Example: 6.31, 6.31.0, 6.31.0-1409, etc.'
+        displayName: Falcon Image Analyzer Version
+        path: version
+      - description: Set the falcon image analyzer volume mount path.
+        displayName: Falcon Image Analyzer Volume Mount Path
+        path: imageAnalyzerConfig.mountPath
+      - description: Name of the Kubernetes Cluster.
+        displayName: Falcon Image Analyzer Cluster Name
+        path: imageAnalyzerConfig.clusterName
+      - description: Exclusions for the Falcon Image Analyzer.
+        displayName: Falcon Image Analyzer Exclusions
+        path: imageAnalyzerConfig.exclusions
+      - description: RegistryConfig for the Falcon Image Analyzer.
+        displayName: Falcon Image Analyzer Registry Configuration Options
+        path: imageAnalyzerConfig.registryConfig
+      - description: Enable debugging for the Falcon Image Analyzer.
+        displayName: Falcon Image Analyzer Enable Debugging
+        path: imageAnalyzerConfig.debug
+      version: v1alpha1
+    - description: FalconNodeSensor is the Schema for the falconnodesensors API
+      displayName: Falcon Node Sensor
+      kind: FalconNodeSensor
+      name: falconnodesensors.falcon.crowdstrike.com
+      specDescriptors:
+      - description: Falcon Customer ID (CID)
+        displayName: Falcon Customer ID (CID)
+        path: falcon.cid
+      - description: "FalconAPI configures connection from your local Falcon operator
+          to CrowdStrike Falcon platform. \n When configured, it will pull the sensor
+          from registry.crowdstrike.com and deploy the appropriate sensor to the cluster.
+          \n If using the API is not desired, the sensor can be manually configured."
+        displayName: Falcon Platform API Configuration
+        path: falcon_api
+      - description: Falcon OAuth2 API Client ID
+        displayName: Client ID
+        path: falcon_api.client_id
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:password
+      - description: Namespace where the Falcon Sensor should be installed. For best
+          security practices, this should be a dedicated namespace that is not used
+          for any other purpose. It also should not be the same namespace where the
+          Falcon Operator, or other Falcon resources are deployed.
+        displayName: Install Namespace
+        path: installNamespace
+        x-descriptors:
+        - urn:alm:descriptor:io.kubernetes:Namespace
+      - description: UpdatePolicy is the name of a sensor update policy configured
+          and enabled in Falcon UI. It is ignored when Image and/or Version are set.
+        displayName: Falcon Sensor Update Policy
+        path: node.advanced.updatePolicy
+      - description: ImagePullSecrets is an optional list of references to secrets
+          in the falcon-system namespace to use for pulling image from image_override
+          location.
+        displayName: Image Pull Secrets
+        path: node.imagePullSecrets
+      - displayName: Falcon Sensor Configuration
+        path: falcon
+      - description: Installation token that prevents unauthorized hosts from being
+          accidentally or maliciously added to your customer ID (CID).
+        displayName: Provisioning Token
+        path: falcon.provisioning_token
+      - description: Falcon OAuth2 API Client Secret
+        displayName: Client Secret
+        path: falcon_api.client_secret
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:password
+      - description: AutoUpdate determines whether to install new versions of the
+          sensor as they become available. Defaults to "off" and is ignored if FalconAPI
+          is not set. Setting this to "force" causes the reconciler to run on every
+          polling cycle, even if a new sensor version is not available. Setting it
+          to "normal" only reconciles when a new version is detected.
+        displayName: Falcon Sensor Automatic Updates
+        path: node.advanced.autoUpdate
+      - description: Location of the Falcon Sensor image. Use only in cases when you
+          mirror the original image to your repository/name:tag
+        displayName: Image
+        path: node.image
+      - description: Enables the operator to deploy a PriorityClass instead of rolling
+          your own. Default is false.
+        displayName: Deploy Priority Class to cluster
+        path: node.priorityClass.deploy
+      - description: Name of the priority class to use for the DaemonSet.
+        displayName: Name of the Priority Class to use
+        path: node.priorityClass.name
+      - description: Disable the Falcon Sensor's use of a proxy.
+        displayName: Disable Falcon Proxy
+        path: falcon.apd
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
+      - description: Cloud Region defines CrowdStrike Falcon Cloud Region to which
+          the operator will connect and register.
+        displayName: CrowdStrike Falcon Cloud Region
+        path: falcon_api.cloud_region
+      - description: Various configuration for DaemonSet Deployment
+        displayName: DaemonSet Configuration
+        path: node
+      - displayName: Image Pull Policy
+        path: node.imagePullPolicy
+      - description: Value of the priority class to use for the DaemonSet. Requires
+          the Deploy field to be set to true.
+        displayName: Priority Class Value
+        path: node.priorityClass.value
+      - description: The application proxy host to use for Falcon sensor proxy configuration.
+        displayName: Falcon Proxy Host
+        path: falcon.aph
+      - description: Falcon Customer ID (CID) Override (optional, default is derived
+          from the API Key pair)
+        displayName: Falcon Customer ID (CID)
+        path: falcon_api.cid
+      - description: Specifies tolerations for custom taints. Defaults to allowing
+          scheduling on all nodes.
+        displayName: Tolerations
+        path: node.tolerations
+      - description: The application proxy port to use for Falcon sensor proxy configuration.
+        displayName: Falcon Proxy Port
+        path: falcon.app
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:number
+      - description: Specifies node affinity for scheduling the DaemonSet. Defaults
+          to allowing scheduling on all nodes.
+        displayName: Node Affinity
+        path: node.nodeAffinity
+      - description: 'Sensor grouping tags are optional, user-defined identifiers
+          that can used to group and filter hosts. Allowed characters: all alphanumerics,
+          ''/'', ''-'', and ''_''.'
+        displayName: Sensor Grouping Tags
+        path: falcon.tags
+      - description: Type of DaemonSet update. Can be "RollingUpdate" or "OnDelete".
+          Default is RollingUpdate.
+        displayName: DaemonSet Update Strategy
+        path: node.updateStrategy
+      - description: Set sensor trace level.
+        displayName: Trace Level
+        path: falcon.trace
+      - description: Kills pod after a specificed amount of time (in seconds). Default
+          is 30 seconds.
+        displayName: Termination Grace Period
+        path: node.terminationGracePeriod
+      - description: Utilize default or Pay-As-You-Go billing.
+        displayName: Billing
+        path: falcon.billing
+      - description: Disables the cleanup of the sensor through DaemonSet on the nodes.
+          Disabling might have unintended consequences for certain operations such
+          as sensor downgrading.
+        displayName: Node Cleanup
+        path: node.disableCleanup
+      - description: Configure resource requests and limits for the DaemonSet Sensor.
+          Only applies when using the eBPF backend.
+        displayName: Falcon eBPF Sensor Resources
+        path: node.resources
+      - description: Enables the use of GKE Autopilot.
+        displayName: GKE Autopilot Settings
+        path: node.gke
+      - description: Enable priority class for the DaemonSet. This is useful for GKE
+          Autopilot clusters, but can be set for any cluster.
+        displayName: Priority Class
+        path: node.priorityClass
+      - description: Advanced configures various options that go against industry
+          practices or are otherwise not recommended for use. Adjusting these settings
+          may result in incorrect or undesirable behavior. Proceed at your own risk.
+          For more information, please see https://github.com/CrowdStrike/falcon-operator/blob/main/docs/ADVANCED.md.
+        displayName: DaemonSet Advanced Settings
+        path: node.advanced
+      - description: Enables the use of GKE Autopilot.
+        displayName: Enabled
+        path: node.gke.autopilot
+      - description: Sets the resource limits for the DaemonSet Sensor. Only applies
+          when using the eBPF backend.
+        displayName: Limits
+        path: node.resources.limits
+      - description: Minimum allowed is 250m.
+        displayName: CPU
+        path: node.resources.limits.cpu
+      - displayName: Ephemeral Storage
+        path: node.resources.limits.ephemeral-storage
+      - description: Minimum allowed is 500Mi.
+        displayName: Memory
+        path: node.resources.limits.memory
+      - description: Sets the resource requests for the DaemonSet Sensor. Only applies
+          when using the eBPF backend.
+        displayName: Requests
+        path: node.resources.requests
+      - description: Minimum allowed is 250m.
+        displayName: CPU
+        path: node.resources.requests.cpu
+      - displayName: Ephemeral Storage
+        path: node.resources.requests.ephemeral-storage
+      - description: Minimum allowed is 500Mi.
+        displayName: Memory
+        path: node.resources.requests.memory
+      - description: Add metadata to the DaemonSet Service Account for IAM roles.
+        displayName: Service Account
+        path: node.serviceAccount
+      - description: Define annotations that will be passed down to the Service Account.
+          This is useful for passing along AWS IAM Role or GCP Workload Identity.
+        displayName: Annotations
+        path: node.serviceAccount.annotations
+      - displayName: Type
+        path: node.updateStrategy.type
       version: v1alpha1
   description: |-
     The CrowdStrike Falcon Operator installs CrowdStrike Falcon custom resources on a Kubernetes cluster.
