@@ -1,4 +1,4 @@
-# Falcon Operator
+# Falcon Deployment
 
 ## About FalconDeployment Custom Resource (CR)
 Falcon Operator introduces the FalconDeployment Custom Resource (CR) to the cluster. This resource is intended to simplify the installation, configuration, and removal of any of the Falcon CRDs within a single manifest - FalconAdmission, FalconContainer, FalconImageAnalyzer, and FalconNodeSensor.
@@ -54,7 +54,7 @@ The additional configurations for `falconNodeSensor`, `imageAnalyzer`, `falconCo
 | deployImageAnalyzer        | (Optional) Boolean to deploy the Image Analyzer. Default: True                                                                                 |
 | deployAdmissionController  | (Optional) Boolean to deploy the Admission Controller. Default: True                                                                           |
 | deployNodeSensor           | (Optional) Boolean to deploy Falcon Node Sensor. Default True                                                                                  |
-| deployFalconContainer      | (Optional) Boolean to deploy Falcon Container. Do not deploy the container sensor alongside the Node Sensor. Default: False                    |
+| deployContainerSensor      | (Optional) Boolean to deploy Falcon Container. Do not deploy the container sensor alongside the Node Sensor. Default: False                    |
 | falconNodeSensor           | (Optional) Additional configurations that map to FalconNodeSensorSpec. All values within the custom resource spec can be overridden here.      | 
 | imageAnalyzer              | (Optional) Additional configurations that map to FalconImageAnalyzerSpec. All values within the custom resource spec can be overridden here.   | 
 | falconContainer            | (Optional) Additional configurations that map to FalconContainerSpec. All values within the custom resource spec can be overridden here.       |
