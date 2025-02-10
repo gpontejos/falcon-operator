@@ -111,7 +111,7 @@ func main() {
 			}
 
 			// Process deployment templates for distro specific directories
-			if strings.Contains(path, "deployment") {
+			if strings.Contains(path, "deployment") && !strings.Contains(path, "falcondeployment") {
 				tempPath := fmt.Sprintf("%s/%s%s/%s", outDir, pathOnly, distro, name)
 				outFile := strings.TrimSuffix(tempPath, ".tmpl")
 				err = createFileUsingTemplate(tpl, outFile, conf)
