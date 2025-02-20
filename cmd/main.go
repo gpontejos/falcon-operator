@@ -55,9 +55,48 @@ const defaultLeaseDuration = time.Second * 30
 const defaultRenewDeadline = time.Second * 20
 
 var (
-	scheme      = runtime.NewScheme()
-	setupLog    = ctrl.Log.WithName("setup")
-	environment = "Kubernetes"
+	scheme            = runtime.NewScheme()
+	setupLog          = ctrl.Log.WithName("setup")
+	environment       = "Kubernetes"
+	requiredCacheObjs = map[client.Object]cache.ByObject{
+		&falconv1alpha1.FalconAdmission{}:  {},
+		&falconv1alpha1.FalconNodeSensor{}: {},
+		&falconv1alpha1.FalconContainer{}:  {},
+		&falconv1alpha1.FalconDeployment{}: {},
+		&schedulingv1.PriorityClass{}: {
+			Label: labels.SelectorFromSet(labels.Set{common.FalconComponentKey: common.FalconKernelSensor}),
+		},
+		&imagev1.ImageStream{}: {
+			Label: labels.SelectorFromSet(labels.Set{common.FalconProviderKey: common.FalconProviderValue}),
+		},
+		&corev1.Service{}: {
+			Label: labels.SelectorFromSet(labels.Set{common.FalconProviderKey: common.FalconProviderValue}),
+		},
+		&corev1.ResourceQuota{}: {
+			Label: labels.SelectorFromSet(labels.Set{common.FalconComponentKey: common.FalconAdmissionController}),
+		},
+		&appsv1.Deployment{}: {
+			Label: labels.SelectorFromSet(labels.Set{common.FalconProviderKey: common.FalconProviderValue}),
+		},
+		&corev1.ConfigMap{}: {
+			Label: labels.SelectorFromSet(labels.Set{common.FalconProviderKey: common.FalconProviderValue}),
+		},
+		&appsv1.DaemonSet{}: {
+			Label: labels.SelectorFromSet(labels.Set{common.FalconComponentKey: common.FalconKernelSensor}),
+		},
+		&arv1.MutatingWebhookConfiguration{}: {
+			Label: labels.SelectorFromSet(labels.Set{common.FalconComponentKey: common.FalconSidecarSensor}),
+		},
+		&arv1.ValidatingWebhookConfiguration{}: {
+			Label: labels.SelectorFromSet(labels.Set{common.FalconComponentKey: common.FalconAdmissionController}),
+		},
+	}
+	optionalCacheObjs = map[client.Object]cache.ByObject{
+		&corev1.Namespace{}:          {},
+		&corev1.Secret{}:             {},
+		&rbacv1.ClusterRoleBinding{}: {},
+		&corev1.ServiceAccount{}:     {},
+	}
 )
 
 func init() {
@@ -79,6 +118,7 @@ func main() {
 	var sensorAutoUpdateInterval time.Duration
 	var leaseDuration time.Duration
 	var renewDeadline time.Duration
+	var disableOptionalCache bool
 
 	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
 	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
@@ -91,6 +131,7 @@ func main() {
 	flag.DurationVar(&sensorAutoUpdateInterval, "sensor-auto-update-interval", defaultSensorAutoUpdateInterval, "The rate at which the Falcon API is queried for new sensor versions")
 	flag.DurationVar(&leaseDuration, "lease-duration", defaultLeaseDuration, "The duration that non-leader candidates will wait to force acquire leadership.")
 	flag.DurationVar(&renewDeadline, "renew-deadline", defaultRenewDeadline, "the duration that the acting controlplane will retry refreshing leadership before giving up.")
+	flag.BoolVar(&disableOptionalCache, "disable-optional-cache", false, "Disable the caching of optional cluster resources.")
 
 	if env := os.Getenv("ARGS"); env != "" {
 		os.Args = append(os.Args, strings.Split(env, " ")...)
@@ -109,6 +150,19 @@ func main() {
 		os.Exit(0)
 	}
 
+	if !disableOptionalCache {
+		for k, v := range optionalCacheObjs {
+			requiredCacheObjs[k] = v
+		}
+	} else {
+		setupLog.Info("the caching of non-falcon resources is disabled")
+	}
+
+	setupLog.Info("Required cache objects:")
+	for key := range requiredCacheObjs {
+		setupLog.Info(fmt.Sprintf("%T", key))
+	}
+
 	options := ctrl.Options{
 		Scheme:                 scheme,
 		MetricsBindAddress:     metricsAddr,
@@ -119,43 +173,7 @@ func main() {
 		LeaseDuration:          &leaseDuration,
 		RenewDeadline:          &renewDeadline,
 		Cache: cache.Options{
-			ByObject: map[client.Object]cache.ByObject{
-				&falconv1alpha1.FalconAdmission{}:  {},
-				&falconv1alpha1.FalconNodeSensor{}: {},
-				&falconv1alpha1.FalconContainer{}:  {},
-				&falconv1alpha1.FalconDeployment{}: {},
-				&corev1.Namespace{}:                {},
-				&corev1.Secret{}:                   {},
-				&rbacv1.ClusterRoleBinding{}:       {},
-				&corev1.ServiceAccount{}:           {},
-				&schedulingv1.PriorityClass{}: {
-					Label: labels.SelectorFromSet(labels.Set{common.FalconComponentKey: common.FalconKernelSensor}),
-				},
-				&imagev1.ImageStream{}: {
-					Label: labels.SelectorFromSet(labels.Set{common.FalconProviderKey: common.FalconProviderValue}),
-				},
-				&corev1.Service{}: {
-					Label: labels.SelectorFromSet(labels.Set{common.FalconProviderKey: common.FalconProviderValue}),
-				},
-				&corev1.ResourceQuota{}: {
-					Label: labels.SelectorFromSet(labels.Set{common.FalconComponentKey: common.FalconAdmissionController}),
-				},
-				&appsv1.Deployment{}: {
-					Label: labels.SelectorFromSet(labels.Set{common.FalconProviderKey: common.FalconProviderValue}),
-				},
-				&corev1.ConfigMap{}: {
-					Label: labels.SelectorFromSet(labels.Set{common.FalconProviderKey: common.FalconProviderValue}),
-				},
-				&appsv1.DaemonSet{}: {
-					Label: labels.SelectorFromSet(labels.Set{common.FalconComponentKey: common.FalconKernelSensor}),
-				},
-				&arv1.MutatingWebhookConfiguration{}: {
-					Label: labels.SelectorFromSet(labels.Set{common.FalconComponentKey: common.FalconSidecarSensor}),
-				},
-				&arv1.ValidatingWebhookConfiguration{}: {
-					Label: labels.SelectorFromSet(labels.Set{common.FalconComponentKey: common.FalconAdmissionController}),
-				},
-			},
+			ByObject: requiredCacheObjs,
 		},
 	}
 

@@ -102,6 +102,45 @@ spec:
         cpu: 250m
         memory: 64Mi
 ```
+
+Alternatively, non-essential resources can be removed from the controller's cache. This is useful if you have a large cluster containing objects that are known to be quite large, such as [Secrets](https://kubernetes.io/docs/concepts/configuration/secret/#restriction-data-size).<br>
+Update the file `deploy/falcon-operator.yaml` for non-OLM installations. For example: For example:
+```yaml
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+spec:
+  template:
+    spec:
+     containers:
+      - name: manager
+        args:
+          - --leader-elect
+          - --disable-optional-cache=true
+```
+Update the file `falcon-operator.clusterserviceversion.yaml` for OLM installations, including OpenShift. For example:
+```yaml
+apiVersion: operators.coreos.com/v1alpha1
+kind: ClusterServiceVersion
+spec:
+  install:
+    spec:
+     deployments:
+      - name: falcon-operator-controller-manager
+        spec:
+          template:
+            spec:
+              containers:
+              - name: manager
+                args:
+                  - --leader-elect
+                  - --disable-optional-cache=true
+```
+OpenShift clusters can be updated either through the `YAML` tab for the operator in the console or by manually editing using the following command:
+```shell
+oc edit clusterserviceversions falcon-operator.v<VERSION> -n falcon-operator
+```
+
 #### Falcon Operator Controller Manager - Idle cluster restarts
 You may see an error similar to the following due to an unstable network or during an upgrade of the falcon-operator:
 ```shell
@@ -111,7 +150,7 @@ I0706 06:39:08.445717       1 leaderelection.go:280] failed to renew lease falco
 ```
 
 Lease Duration and Renewal Deadline can be increased to prevent this from happening by utilizing the `lease-duration` and `renew-deadline` flags within the operator manifest.<br>
-Update the file `deploy/falcon-operator.yaml` for non-olm installations. For example:
+Update the file `deploy/falcon-operator.yaml` for non-OLM installations. For example:
 ```yaml
 ---
 apiVersion: apiextensions.k8s.io/v1
@@ -126,7 +165,7 @@ spec:
           - --lease-duration=60s
           - --renew-deadline=45s
 ```
-Update the file `falcon-operator.clusterserviceversion.yaml` for olm installations, including OpenShift. For example:
+Update the file `falcon-operator.clusterserviceversion.yaml` for OLM installations, including OpenShift. For example:
 ```yaml
 apiVersion: operators.coreos.com/v1alpha1
 kind: ClusterServiceVersion
@@ -145,3 +184,10 @@ spec:
                   - --lease-duration=60s
                   - --renew-deadline=45s
 ```
+OpenShift clusters can be updated either through the `YAML` tab for the operator in the console or by manually editing using the following command:
+```shell
+oc edit clusterserviceversions falcon-operator.v<VERSION> -n falcon-operator
+```
+
+#### Falcon Operator Controller Manager - High memory usage
+The current default behavior of the Falcon Operator controller is to cache Secrets, Namespace, ClusterRoleBinding, and ServiceAccount objects, along with objects essential to the Falcon Operator's operation. 
