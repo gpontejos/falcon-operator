@@ -1,0 +1,9 @@
+apiVersion: falcon.crowdstrike.com/v1alpha1
+kind: FalconDeployment
+metadata:
+  labels:
+    app.kubernetes.io/name: output-dir
+    app.kubernetes.io/managed-by: kustomize
+  name: falcondeployment-sample
+spec:
+  # TODO(user): Add fields here

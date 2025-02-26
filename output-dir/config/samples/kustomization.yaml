@@ -1,0 +1,8 @@
+## Append samples of your project ##
+resources:
+- falcon_v1alpha1_falconcontainer.yaml
+- falcon_v1alpha1_falconnodesensor.yaml
+- falcon_v1alpha1_falconadmission.yaml
+- falcon_v1alpha1_falconimageanalyzer.yaml
+- falcon_v1alpha1_falcondeployment.yaml
+# +kubebuilder:scaffold:manifestskustomizesamples

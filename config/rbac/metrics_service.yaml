@@ -3,7 +3,7 @@ kind: Service
 metadata:
   labels:
     control-plane: controller-manager
-    crowdstrike.com/component: kube-rbac-proxy
+    crowdstrike.com/component: metrics-server
     crowdstrike.com/created-by: falcon-operator
     crowdstrike.com/instance: controller-manager-metrics-service
     crowdstrike.com/managed-by: kustomize
@@ -17,6 +17,6 @@ spec:
   - name: https
     port: 8443
     protocol: TCP
-    targetPort: https
+    targetPort: 8443
   selector:
     control-plane: controller-manager

@@ -27,10 +27,10 @@ resources:
 #- ../prometheus
 
 patches:
-- path: patches/auth_proxy_client_clusterrole.yaml
-- path: patches/auth_proxy_role.yaml
-- path: patches/auth_proxy_role_binding.yaml
-- path: patches/auth_proxy_service.yaml
+- path: patches/metrics_auth_role_binding.yaml
+- path: patches/metrics_auth_role.yaml
+- path: patches/metrics_reader_role.yaml
+- path: patches/metrics_service_role_binding.yaml
 - path: patches/manager_patch.yaml
 - path: patches/namespace_patch.yaml
 - path: patches/falconnodesensor_role.yaml
