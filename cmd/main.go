@@ -139,7 +139,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	fmt.Println(scheme)
+	// fmt.Println(scheme)
 
 	options := ctrl.Options{
 		Scheme: scheme,
@@ -167,20 +167,20 @@ func main() {
 		RenewDeadline:          &renewDeadline,
 		Cache: cache.Options{
 			ByObject: map[client.Object]cache.ByObject{
-				&falconv1alpha1.FalconAdmission{}:  {},
-				&falconv1alpha1.FalconNodeSensor{}: {},
-				&falconv1alpha1.FalconContainer{}:  {},
-				&falconv1alpha1.FalconDeployment{}: {},
-				&corev1.Namespace{}:                {},
-				&corev1.Secret{}:                   {},
-				&rbacv1.ClusterRoleBinding{}:       {},
-				&corev1.ServiceAccount{}:           {},
+				// &falconv1alpha1.FalconAdmission{}:  {},
+				// &falconv1alpha1.FalconNodeSensor{}: {},
+				// &falconv1alpha1.FalconContainer{}:  {},
+				// &falconv1alpha1.FalconDeployment{}: {},
+				&corev1.Namespace{}:          {},
+				&corev1.Secret{}:             {},
+				&rbacv1.ClusterRoleBinding{}: {},
+				&corev1.ServiceAccount{}:     {},
 				&schedulingv1.PriorityClass{}: {
 					Label: labels.SelectorFromSet(labels.Set{common.FalconComponentKey: common.FalconKernelSensor}),
 				},
-				&imagev1.ImageStream{}: {
-					Label: labels.SelectorFromSet(labels.Set{common.FalconProviderKey: common.FalconProviderValue}),
-				},
+				// &imagev1.ImageStream{}: {
+				// 	Label: labels.SelectorFromSet(labels.Set{common.FalconProviderKey: common.FalconProviderValue}),
+				// },
 				&corev1.Service{}: {
 					Label: labels.SelectorFromSet(labels.Set{common.FalconProviderKey: common.FalconProviderValue}),
 				},

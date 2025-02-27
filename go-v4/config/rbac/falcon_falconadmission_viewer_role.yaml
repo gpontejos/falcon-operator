@@ -1,0 +1,23 @@
+# permissions for end users to view falconadmissions.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: go-v4
+    app.kubernetes.io/managed-by: kustomize
+  name: falcon-falconadmission-viewer-role
+rules:
+- apiGroups:
+  - falcon.crowdstrike.com
+  resources:
+  - falconadmissions
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - falcon.crowdstrike.com
+  resources:
+  - falconadmissions/status
+  verbs:
+  - get
