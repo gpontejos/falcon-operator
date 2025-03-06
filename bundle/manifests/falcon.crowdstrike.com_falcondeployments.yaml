@@ -776,6 +776,9 @@ spec:
                         type: integer
                         x-kubernetes-int-or-string: true
                       logVolume:
+                        default:
+                          emptyDir: {}
+                          name: falcon-log-volume
                         description: Volume represents a named volume in a pod that
                           may be accessed by any container in the pod.
                         properties:

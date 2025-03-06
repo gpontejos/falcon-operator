@@ -148,7 +148,7 @@ metadata:
     capabilities: Seamless Upgrades
     categories: Security,Monitoring
     containerImage: quay.io/crowdstrike/falcon-operator
-    createdAt: "2025-03-04T20:21:33Z"
+    createdAt: "2025-03-05T23:42:16Z"
     description: Falcon Operator installs CrowdStrike Falcon Sensors on the cluster
     features.operators.openshift.io/cnf: "false"
     features.operators.openshift.io/cni: "false"
@@ -161,7 +161,7 @@ metadata:
     features.operators.openshift.io/token-auth-azure: "false"
     features.operators.openshift.io/token-auth-gcp: "false"
     operatorframework.io/suggested-namespace: falcon-operator
-    operators.operatorframework.io/builder: operator-sdk-v1.38.0
+    operators.operatorframework.io/builder: operator-sdk-v1.34.1
     operators.operatorframework.io/project_layout: go.kubebuilder.io/v4
     repository: https://github.com/CrowdStrike/falcon-operator
     support: Community Only
@@ -208,10 +208,10 @@ spec:
         path: falcon_api.client_id
         x-descriptors:
         - urn:alm:descriptor:com.tectonic.ui:password
-      - description: |-
-          Namespace where the Falcon Admission Controller should be installed.
-          For best security practices, this should be a dedicated namespace that is not used for any other purpose.
-          It also should not be the same namespace where the Falcon Operator or the Falcon Sensor is installed.
+      - description: Namespace where the Falcon Admission Controller should be installed.
+          For best security practices, this should be a dedicated namespace that is
+          not used for any other purpose. It also should not be the same namespace
+          where the Falcon Operator or the Falcon Sensor is installed.
         displayName: Install Namespace
         path: installNamespace
         x-descriptors:
@@ -239,14 +239,11 @@ spec:
           accidentally or maliciously added to your customer ID (CID).
         displayName: Provisioning Token
         path: falcon.provisioning_token
-      - description: |-
-          FalconAPI configures connection from your local Falcon operator to CrowdStrike Falcon platform.
-
-
-          When configured, it will pull the sensor from registry.crowdstrike.com and deploy the appropriate sensor to the cluster.
-
-
-          If using the API is not desired, the sensor can be manually configured by setting the Image and Version fields.
+      - description: "FalconAPI configures connection from your local Falcon operator
+          to CrowdStrike Falcon platform. \n When configured, it will pull the sensor
+          from registry.crowdstrike.com and deploy the appropriate sensor to the cluster.
+          \n If using the API is not desired, the sensor can be manually configured
+          by setting the Image and Version fields."
         displayName: Falcon Platform API Configuration
         path: falcon_api
       - description: Falcon OAuth2 API Client Secret
@@ -417,10 +414,10 @@ spec:
         path: injector.serviceAccount
       - displayName: Falcon Container Injector TLS Validity Length (days)
         path: injector.tls.validity
-      - description: |-
-          Namespace where the Falcon Sensor should be installed.
-          For best security practices, this should be a dedicated namespace that is not used for any other purpose.
-          It also should not be the same namespace where the Falcon Operator, or other Falcon resources are deployed.
+      - description: Namespace where the Falcon Sensor should be installed. For best
+          security practices, this should be a dedicated namespace that is not used
+          for any other purpose. It also should not be the same namespace where the
+          Falcon Operator, or other Falcon resources are deployed.
         displayName: Install Namespace
         path: installNamespace
         x-descriptors:
@@ -434,10 +431,11 @@ spec:
       - description: Type of container registry to be used
         displayName: Registry Type
         path: registry.type
-      - description: |-
-          AutoUpdate determines whether to install new versions of the sensor as they become available. Defaults to "off" and is ignored if FalconAPI is not set.
-          Setting this to "force" causes the reconciler to run on every polling cycle, even if a new sensor version is not available.
-          Setting it to "normal" only reconciles when a new version is detected.
+      - description: AutoUpdate determines whether to install new versions of the
+          sensor as they become available. Defaults to "off" and is ignored if FalconAPI
+          is not set. Setting this to "force" causes the reconciler to run on every
+          polling cycle, even if a new sensor version is not available. Setting it
+          to "normal" only reconciles when a new version is detected.
         displayName: Falcon Sensor Automatic Updates
         path: advanced.autoUpdate
       - description: Installation token that prevents unauthorized hosts from being
@@ -539,9 +537,9 @@ spec:
         path: injector.azureConfigPath
       - displayName: Injector replica count
         path: injector.replicas
-      - description: |-
-          Advanced configures various options that go against industry practices or are otherwise not recommended for use.
-          Adjusting these settings may result in incorrect or undesirable behavior. Proceed at your own risk.
+      - description: Advanced configures various options that go against industry
+          practices or are otherwise not recommended for use. Adjusting these settings
+          may result in incorrect or undesirable behavior. Proceed at your own risk.
           For more information, please see https://github.com/CrowdStrike/falcon-operator/blob/main/docs/ADVANCED.md.
         displayName: Falcon Container Advanced Settings
         path: advanced
@@ -587,10 +585,10 @@ spec:
         path: falconAdmission.falcon_api.client_id
         x-descriptors:
         - urn:alm:descriptor:com.tectonic.ui:password
-      - description: |-
-          Namespace where the Falcon Admission Controller should be installed.
-          For best security practices, this should be a dedicated namespace that is not used for any other purpose.
-          It also should not be the same namespace where the Falcon Operator or the Falcon Sensor is installed.
+      - description: Namespace where the Falcon Admission Controller should be installed.
+          For best security practices, this should be a dedicated namespace that is
+          not used for any other purpose. It also should not be the same namespace
+          where the Falcon Operator or the Falcon Sensor is installed.
         displayName: Install Namespace
         path: falconAdmission.installNamespace
         x-descriptors:
@@ -630,10 +628,10 @@ spec:
         path: falconContainerSensor.injector.serviceAccount
       - displayName: Falcon Container Injector TLS Validity Length (days)
         path: falconContainerSensor.injector.tls.validity
-      - description: |-
-          Namespace where the Falcon Sensor should be installed.
-          For best security practices, this should be a dedicated namespace that is not used for any other purpose.
-          It also should not be the same namespace where the Falcon Operator, or other Falcon resources are deployed.
+      - description: Namespace where the Falcon Sensor should be installed. For best
+          security practices, this should be a dedicated namespace that is not used
+          for any other purpose. It also should not be the same namespace where the
+          Falcon Operator, or other Falcon resources are deployed.
         displayName: Install Namespace
         path: falconContainerSensor.installNamespace
         x-descriptors:
@@ -678,10 +676,10 @@ spec:
         path: falconImageAnalyzer.imageAnalyzerConfig.updateStrategy.rollingUpdate
         x-descriptors:
         - urn:alm:descriptor:com.tectonic.ui:updateStrategy
-      - description: |-
-          Namespace where the Falcon Image Analyzer should be installed.
-          For best security practices, this should be a dedicated namespace that is not used for any other purpose.
-          It also should not be the same namespace where the Falcon Operator or the Falcon Sensor is installed.
+      - description: Namespace where the Falcon Image Analyzer should be installed.
+          For best security practices, this should be a dedicated namespace that is
+          not used for any other purpose. It also should not be the same namespace
+          where the Falcon Operator or the Falcon Sensor is installed.
         displayName: Install Namespace
         path: falconImageAnalyzer.installNamespace
         x-descriptors:
@@ -698,14 +696,10 @@ spec:
       - description: Falcon Customer ID (CID)
         displayName: Falcon Customer ID (CID)
         path: falconNodeSensor.falcon.cid
-      - description: |-
-          FalconAPI configures connection from your local Falcon operator to CrowdStrike Falcon platform.
-
-
-          When configured, it will pull the sensor from registry.crowdstrike.com and deploy the appropriate sensor to the cluster.
-
-
-          If using the API is not desired, the sensor can be manually configured.
+      - description: "FalconAPI configures connection from your local Falcon operator
+          to CrowdStrike Falcon platform. \n When configured, it will pull the sensor
+          from registry.crowdstrike.com and deploy the appropriate sensor to the cluster.
+          \n If using the API is not desired, the sensor can be manually configured."
         displayName: Falcon Platform API Configuration
         path: falconNodeSensor.falcon_api
       - description: Falcon OAuth2 API Client ID
@@ -713,10 +707,10 @@ spec:
         path: falconNodeSensor.falcon_api.client_id
         x-descriptors:
         - urn:alm:descriptor:com.tectonic.ui:password
-      - description: |-
-          Namespace where the Falcon Sensor should be installed.
-          For best security practices, this should be a dedicated namespace that is not used for any other purpose.
-          It also should not be the same namespace where the Falcon Operator, or other Falcon resources are deployed.
+      - description: Namespace where the Falcon Sensor should be installed. For best
+          security practices, this should be a dedicated namespace that is not used
+          for any other purpose. It also should not be the same namespace where the
+          Falcon Operator, or other Falcon resources are deployed.
         displayName: Install Namespace
         path: falconNodeSensor.installNamespace
         x-descriptors:
@@ -752,14 +746,11 @@ spec:
           accidentally or maliciously added to your customer ID (CID).
         displayName: Provisioning Token
         path: falconAdmission.falcon.provisioning_token
-      - description: |-
-          FalconAPI configures connection from your local Falcon operator to CrowdStrike Falcon platform.
-
-
-          When configured, it will pull the sensor from registry.crowdstrike.com and deploy the appropriate sensor to the cluster.
-
-
-          If using the API is not desired, the sensor can be manually configured by setting the Image and Version fields.
+      - description: "FalconAPI configures connection from your local Falcon operator
+          to CrowdStrike Falcon platform. \n When configured, it will pull the sensor
+          from registry.crowdstrike.com and deploy the appropriate sensor to the cluster.
+          \n If using the API is not desired, the sensor can be manually configured
+          by setting the Image and Version fields."
         displayName: Falcon Platform API Configuration
         path: falconAdmission.falcon_api
       - description: Falcon OAuth2 API Client Secret
@@ -775,10 +766,11 @@ spec:
           or base64 encoded string
         displayName: Registry CA Certificate Bundle; optionally (double) base64 encoded
         path: falconAdmission.registry.tls.caCertificate
-      - description: |-
-          AutoUpdate determines whether to install new versions of the sensor as they become available. Defaults to "off" and is ignored if FalconAPI is not set.
-          Setting this to "force" causes the reconciler to run on every polling cycle, even if a new sensor version is not available.
-          Setting it to "normal" only reconciles when a new version is detected.
+      - description: AutoUpdate determines whether to install new versions of the
+          sensor as they become available. Defaults to "off" and is ignored if FalconAPI
+          is not set. Setting this to "force" causes the reconciler to run on every
+          polling cycle, even if a new sensor version is not available. Setting it
+          to "normal" only reconciles when a new version is detected.
         displayName: Falcon Sensor Automatic Updates
         path: falconContainerSensor.advanced.autoUpdate
       - description: Installation token that prevents unauthorized hosts from being
@@ -804,11 +796,9 @@ spec:
           or base64 encoded string
         displayName: Registry CA Certificate Bundle; optionally (double) base64 encoded
         path: falconContainerSensor.registry.tls.caCertificate
-      - description: |-
-          FalconAPI configures connection from your local Falcon operator to CrowdStrike Falcon platform.
-
-
-          When configured, it will pull the sensor from registry.crowdstrike.com and deploy the appropriate sensor to the cluster.
+      - description: "FalconAPI configures connection from your local Falcon operator
+          to CrowdStrike Falcon platform. \n When configured, it will pull the sensor
+          from registry.crowdstrike.com and deploy the appropriate sensor to the cluster."
         displayName: Falcon Platform API Configuration
         path: falconImageAnalyzer.falcon_api
       - description: Falcon OAuth2 API Client Secret
@@ -842,10 +832,11 @@ spec:
         path: falconNodeSensor.falcon_api.client_secret
         x-descriptors:
         - urn:alm:descriptor:com.tectonic.ui:password
-      - description: |-
-          AutoUpdate determines whether to install new versions of the sensor as they become available. Defaults to "off" and is ignored if FalconAPI is not set.
-          Setting this to "force" causes the reconciler to run on every polling cycle, even if a new sensor version is not available.
-          Setting it to "normal" only reconciles when a new version is detected.
+      - description: AutoUpdate determines whether to install new versions of the
+          sensor as they become available. Defaults to "off" and is ignored if FalconAPI
+          is not set. Setting this to "force" causes the reconciler to run on every
+          polling cycle, even if a new sensor version is not available. Setting it
+          to "normal" only reconciles when a new version is detected.
         displayName: Falcon Sensor Automatic Updates
         path: falconNodeSensor.node.advanced.autoUpdate
       - description: Location of the Falcon Sensor image. Use only in cases when you
@@ -859,14 +850,10 @@ spec:
       - description: Name of the priority class to use for the DaemonSet.
         displayName: Name of the Priority Class to use
         path: falconNodeSensor.node.priorityClass.name
-      - description: |-
-          FalconAPI configures connection from your local Falcon operator to CrowdStrike Falcon platform.
-
-
-          When configured, it will pull the sensor from registry.crowdstrike.com and deploy the appropriate sensor to the cluster.
-
-
-          If using the API is not desired, the sensor can be manually configured.
+      - description: "FalconAPI configures connection from your local Falcon operator
+          to CrowdStrike Falcon platform. \n When configured, it will pull the sensor
+          from registry.crowdstrike.com and deploy the appropriate sensor to the cluster.
+          \n If using the API is not desired, the sensor can be manually configured."
         displayName: Falcon Platform API Configuration
         path: falcon_api
       - description: Falcon OAuth2 API Client Secret
@@ -1193,9 +1180,9 @@ spec:
       - description: Utilize default or Pay-As-You-Go billing.
         displayName: Billing
         path: falconNodeSensor.falcon.billing
-      - description: |-
-          Disables the cleanup of the sensor through DaemonSet on the nodes.
-          Disabling might have unintended consequences for certain operations such as sensor downgrading.
+      - description: Disables the cleanup of the sensor through DaemonSet on the nodes.
+          Disabling might have unintended consequences for certain operations such
+          as sensor downgrading.
         displayName: Node Cleanup
         path: falconNodeSensor.node.disableCleanup
       - displayName: Falcon Admission Controller Client Resources
@@ -1277,9 +1264,9 @@ spec:
       - description: Determines if Kubernetes resources are watched for cluster visibility.
         displayName: Enable Resource Watcher
         path: falconAdmission.admissionConfig.watcherEnabled
-      - description: |-
-          Advanced configures various options that go against industry practices or are otherwise not recommended for use.
-          Adjusting these settings may result in incorrect or undesirable behavior. Proceed at your own risk.
+      - description: Advanced configures various options that go against industry
+          practices or are otherwise not recommended for use. Adjusting these settings
+          may result in incorrect or undesirable behavior. Proceed at your own risk.
           For more information, please see https://github.com/CrowdStrike/falcon-operator/blob/main/docs/ADVANCED.md.
         displayName: Falcon Container Advanced Settings
         path: falconContainerSensor.advanced
@@ -1287,9 +1274,9 @@ spec:
           This is useful for passing along AWS IAM Role or GCP Workload Identity.
         displayName: Annotations
         path: falconContainerSensor.injector.serviceAccount.annotations
-      - description: |-
-          Advanced configures various options that go against industry practices or are otherwise not recommended for use.
-          Adjusting these settings may result in incorrect or undesirable behavior. Proceed at your own risk.
+      - description: Advanced configures various options that go against industry
+          practices or are otherwise not recommended for use. Adjusting these settings
+          may result in incorrect or undesirable behavior. Proceed at your own risk.
           For more information, please see https://github.com/CrowdStrike/falcon-operator/blob/main/docs/ADVANCED.md.
         displayName: DaemonSet Advanced Settings
         path: falconNodeSensor.node.advanced
@@ -1367,10 +1354,10 @@ spec:
         path: imageAnalyzerConfig.updateStrategy.rollingUpdate
         x-descriptors:
         - urn:alm:descriptor:com.tectonic.ui:updateStrategy
-      - description: |-
-          Namespace where the Falcon Image Analyzer should be installed.
-          For best security practices, this should be a dedicated namespace that is not used for any other purpose.
-          It also should not be the same namespace where the Falcon Operator or the Falcon Sensor is installed.
+      - description: Namespace where the Falcon Image Analyzer should be installed.
+          For best security practices, this should be a dedicated namespace that is
+          not used for any other purpose. It also should not be the same namespace
+          where the Falcon Operator or the Falcon Sensor is installed.
         displayName: Install Namespace
         path: installNamespace
         x-descriptors:
@@ -1384,11 +1371,9 @@ spec:
       - description: Type of container registry to be used
         displayName: Registry Type
         path: registry.type
-      - description: |-
-          FalconAPI configures connection from your local Falcon operator to CrowdStrike Falcon platform.
-
-
-          When configured, it will pull the sensor from registry.crowdstrike.com and deploy the appropriate sensor to the cluster.
+      - description: "FalconAPI configures connection from your local Falcon operator
+          to CrowdStrike Falcon platform. \n When configured, it will pull the sensor
+          from registry.crowdstrike.com and deploy the appropriate sensor to the cluster."
         displayName: Falcon Platform API Configuration
         path: falcon_api
       - description: Falcon OAuth2 API Client Secret
@@ -1490,14 +1475,10 @@ spec:
       - description: Falcon Customer ID (CID)
         displayName: Falcon Customer ID (CID)
         path: falcon.cid
-      - description: |-
-          FalconAPI configures connection from your local Falcon operator to CrowdStrike Falcon platform.
-
-
-          When configured, it will pull the sensor from registry.crowdstrike.com and deploy the appropriate sensor to the cluster.
-
-
-          If using the API is not desired, the sensor can be manually configured.
+      - description: "FalconAPI configures connection from your local Falcon operator
+          to CrowdStrike Falcon platform. \n When configured, it will pull the sensor
+          from registry.crowdstrike.com and deploy the appropriate sensor to the cluster.
+          \n If using the API is not desired, the sensor can be manually configured."
         displayName: Falcon Platform API Configuration
         path: falcon_api
       - description: Falcon OAuth2 API Client ID
@@ -1505,10 +1486,10 @@ spec:
         path: falcon_api.client_id
         x-descriptors:
         - urn:alm:descriptor:com.tectonic.ui:password
-      - description: |-
-          Namespace where the Falcon Sensor should be installed.
-          For best security practices, this should be a dedicated namespace that is not used for any other purpose.
-          It also should not be the same namespace where the Falcon Operator, or other Falcon resources are deployed.
+      - description: Namespace where the Falcon Sensor should be installed. For best
+          security practices, this should be a dedicated namespace that is not used
+          for any other purpose. It also should not be the same namespace where the
+          Falcon Operator, or other Falcon resources are deployed.
         displayName: Install Namespace
         path: installNamespace
         x-descriptors:
@@ -1533,10 +1514,11 @@ spec:
         path: falcon_api.client_secret
         x-descriptors:
         - urn:alm:descriptor:com.tectonic.ui:password
-      - description: |-
-          AutoUpdate determines whether to install new versions of the sensor as they become available. Defaults to "off" and is ignored if FalconAPI is not set.
-          Setting this to "force" causes the reconciler to run on every polling cycle, even if a new sensor version is not available.
-          Setting it to "normal" only reconciles when a new version is detected.
+      - description: AutoUpdate determines whether to install new versions of the
+          sensor as they become available. Defaults to "off" and is ignored if FalconAPI
+          is not set. Setting this to "force" causes the reconciler to run on every
+          polling cycle, even if a new sensor version is not available. Setting it
+          to "normal" only reconciles when a new version is detected.
         displayName: Falcon Sensor Automatic Updates
         path: node.advanced.autoUpdate
       - description: Location of the Falcon Sensor image. Use only in cases when you
@@ -1607,9 +1589,9 @@ spec:
       - description: Utilize default or Pay-As-You-Go billing.
         displayName: Billing
         path: falcon.billing
-      - description: |-
-          Disables the cleanup of the sensor through DaemonSet on the nodes.
-          Disabling might have unintended consequences for certain operations such as sensor downgrading.
+      - description: Disables the cleanup of the sensor through DaemonSet on the nodes.
+          Disabling might have unintended consequences for certain operations such
+          as sensor downgrading.
         displayName: Node Cleanup
         path: node.disableCleanup
       - description: Configure resource requests and limits for the DaemonSet Sensor.
@@ -1623,9 +1605,9 @@ spec:
           Autopilot clusters, but can be set for any cluster.
         displayName: Priority Class
         path: node.priorityClass
-      - description: |-
-          Advanced configures various options that go against industry practices or are otherwise not recommended for use.
-          Adjusting these settings may result in incorrect or undesirable behavior. Proceed at your own risk.
+      - description: Advanced configures various options that go against industry
+          practices or are otherwise not recommended for use. Adjusting these settings
+          may result in incorrect or undesirable behavior. Proceed at your own risk.
           For more information, please see https://github.com/CrowdStrike/falcon-operator/blob/main/docs/ADVANCED.md.
         displayName: DaemonSet Advanced Settings
         path: node.advanced
@@ -1980,7 +1962,7 @@ spec:
                       fieldPath: metadata.annotations['olm.targetNamespaces']
                 - name: OPERATOR_NAME
                   value: falcon-operator
-                image: quay.io/crowdstrike/falcon-operator:go-test-1
+                image: controller:latest
                 livenessProbe:
                   httpGet:
                     path: /healthz

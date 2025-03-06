@@ -62,7 +62,7 @@ type FalconDeploymentSpec struct {
 	FalconImageAnalyzer FalconImageAnalyzerSpec `json:"falconImageAnalyzer,omitempty"`
 
 	// Falcon Container Sensor Configuration
-	// +kubebuilder:default:={}
+	// +kubebuilder:default={"injector": {"logVolume" : {"name": "falcon-log-volume", "emptyDir": {}}}}
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Falcon Container Sensor Configuration",order=11
 	FalconContainerSensor FalconContainerSpec `json:"falconContainerSensor,omitempty"`
 }

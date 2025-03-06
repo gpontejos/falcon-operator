@@ -77,6 +77,7 @@ type FalconContainerInjectorSpec struct {
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Falcon Container Image Pull Secret Name",order=5
 	ImagePullSecretName string `json:"imagePullSecret,omitempty"`
 
+	// +kubebuilder:default={"name": "falcon-log-volume", "emptyDir": {}}
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Falcon Container Shared Log Volume",order=6
 	LogVolume *corev1.Volume `json:"logVolume,omitempty"`
 
