@@ -759,7 +759,7 @@ func AdmissionDeployment(name string, namespace string, component string, imageU
 											{
 												Key:      "kubernetes.io/arch",
 												Operator: corev1.NodeSelectorOpIn,
-												Values:   []string{"amd64"},
+												Values:   []string{"amd64", "arm64"},
 											},
 										},
 									},
