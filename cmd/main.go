@@ -61,10 +61,6 @@ var (
 	setupLog          = ctrl.Log.WithName("setup")
 	environment       = "Kubernetes"
 	requiredCacheObjs = map[client.Object]cache.ByObject{
-		&corev1.Namespace{}:                {},
-		&corev1.Secret{}:                   {},
-		&rbacv1.ClusterRoleBinding{}:       {},
-		&corev1.ServiceAccount{}:           {},
 		&falconv1alpha1.FalconAdmission{}:  {},
 		&falconv1alpha1.FalconNodeSensor{}: {},
 		&falconv1alpha1.FalconContainer{}:  {},
@@ -94,6 +90,12 @@ var (
 			Label: labels.SelectorFromSet(labels.Set{common.FalconComponentKey: common.FalconAdmissionController}),
 		},
 	}
+	optionalCacheObjs = map[client.Object]cache.ByObject{
+		&corev1.Namespace{}:          {},
+		&corev1.Secret{}:             {},
+		&rbacv1.ClusterRoleBinding{}: {},
+		&corev1.ServiceAccount{}:     {},
+	}
 )
 
 func init() {
@@ -118,6 +120,7 @@ func main() {
 	var sensorAutoUpdateInterval time.Duration
 	var leaseDuration time.Duration
 	var renewDeadline time.Duration
+	var disableOptionalCache bool
 
 	flag.StringVar(&metricsAddr, "metrics-bind-address", "0", "The address the metrics endpoint binds to. "+
 		"Use :8443 for HTTPS or :8080 for HTTP, or leave as 0 to disable the metrics service.")
@@ -135,6 +138,7 @@ func main() {
 	flag.DurationVar(&sensorAutoUpdateInterval, "sensor-auto-update-interval", defaultSensorAutoUpdateInterval, "The rate at which the Falcon API is queried for new sensor versions")
 	flag.DurationVar(&leaseDuration, "lease-duration", defaultLeaseDuration, "The duration that non-leader candidates will wait to force acquire leadership.")
 	flag.DurationVar(&renewDeadline, "renew-deadline", defaultRenewDeadline, "the duration that the acting controlplane will retry refreshing leadership before giving up.")
+	flag.BoolVar(&disableOptionalCache, "disable-optional-cache", false, "Disable the caching of optional cluster resources.")
 
 	if env := os.Getenv("ARGS"); env != "" {
 		os.Args = append(os.Args, strings.Split(env, " ")...)
@@ -152,6 +156,14 @@ func main() {
 	if ver {
 		fmt.Printf("%s version: %q, go version: %q\n", os.Args[0], version.Get(), version.GoVersion)
 		os.Exit(0)
+	}
+
+	if !disableOptionalCache {
+		for k, v := range optionalCacheObjs {
+			requiredCacheObjs[k] = v
+		}
+	} else {
+		setupLog.Info("the caching of non-falcon resources is disabled")
 	}
 
 	dc, err := discovery.NewDiscoveryClientForConfig(ctrl.GetConfigOrDie())
