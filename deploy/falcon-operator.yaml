@@ -8263,7 +8263,6 @@ spec:
         - name: OPERATOR_NAME
           value: falcon-operator
         image: controller:latest
-        imagePullPolicy: Never
         livenessProbe:
           httpGet:
             path: /healthz

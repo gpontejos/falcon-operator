@@ -91,10 +91,18 @@ var (
 		},
 	}
 	optionalCacheObjs = map[client.Object]cache.ByObject{
-		&corev1.Namespace{}:          {},
-		&corev1.Secret{}:             {},
-		&rbacv1.ClusterRoleBinding{}: {},
-		&corev1.ServiceAccount{}:     {},
+		&corev1.Namespace{}: {
+			Label: labels.SelectorFromSet(labels.Set{common.FalconInstanceNameKey: "namespace"}),
+		},
+		&corev1.Secret{}: {
+			Label: labels.SelectorFromSet(labels.Set{common.FalconInstanceNameKey: "secret"}),
+		},
+		&rbacv1.ClusterRoleBinding{}: {
+			Label: labels.SelectorFromSet(labels.Set{common.FalconInstanceNameKey: "clusterrolebinding"}),
+		},
+		&corev1.ServiceAccount{}: {
+			Label: labels.SelectorFromSet(labels.Set{common.FalconInstanceNameKey: "serviceaccount"}),
+		},
 	}
 )
 
@@ -158,14 +166,6 @@ func main() {
 		os.Exit(0)
 	}
 
-	if !disableOptionalCache {
-		for k, v := range optionalCacheObjs {
-			requiredCacheObjs[k] = v
-		}
-	} else {
-		setupLog.Info("the caching of non-falcon resources is disabled")
-	}
-
 	dc, err := discovery.NewDiscoveryClientForConfig(ctrl.GetConfigOrDie())
 	if err != nil {
 		setupLog.Error(err, "failed to create discovery client")
@@ -183,8 +183,10 @@ func main() {
 			setupLog.V(1).Info("WARNING: this operator is not certified for OpenShift. Please install and use the certified operator for proper OpenShift support.")
 		}
 
-		requiredCacheObjs[&imagev1.ImageStream{}] = cache.ByObject{
-			Label: labels.SelectorFromSet(labels.Set{common.FalconProviderKey: common.FalconProviderValue}),
+		if !disableOptionalCache {
+			requiredCacheObjs[&imagev1.ImageStream{}] = cache.ByObject{
+				Label: labels.SelectorFromSet(labels.Set{common.FalconProviderKey: common.FalconProviderValue}),
+			}
 		}
 	} else {
 		setupLog.Info(fmt.Sprintf("openshift api is not available. cluster is running %s", environment))
@@ -227,6 +229,19 @@ func main() {
 		// metricsServerOptions.CertDir = "/tmp/k8s-metrics-server/metrics-certs"
 		// metricsServerOptions.CertName = "tls.crt"
 		// metricsServerOptions.KeyName = "tls.key"
+	}
+
+	if !disableOptionalCache {
+		for k, v := range optionalCacheObjs {
+			requiredCacheObjs[k] = v
+		}
+	} else {
+		setupLog.Info("the caching of non-falcon resources is disabled")
+	}
+
+	setupLog.Info("Required cache objects:")
+	for key := range requiredCacheObjs {
+		setupLog.Info(fmt.Sprintf("%T", key))
 	}
 
 	options := ctrl.Options{
