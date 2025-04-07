@@ -262,8 +262,8 @@ func TestVersionLock_WithUpdatePolicy(t *testing.T) {
 
 func newTestFalconAPI(cid *string) *falconv1alpha1.FalconAPI {
 	return &falconv1alpha1.FalconAPI{
-		ClientId:     "testID",
-		ClientSecret: "testSecret",
+		ClientId:     stringPointer("testID"),
+		ClientSecret: stringPointer("testSecret"),
 		CloudRegion:  "testRegion",
 		CID:          cid,
 		HostOverride: strings.TrimSpace(os.Getenv("FALCON_API_HOST")),

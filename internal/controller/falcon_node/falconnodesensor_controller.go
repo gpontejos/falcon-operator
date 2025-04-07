@@ -153,6 +153,10 @@ func (r *FalconNodeSensorReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		}
 	}
 
+	if err := r.handleExistingFalconSecret(ctx, nodesensor); err != nil {
+		return ctrl.Result{}, err
+	}
+
 	created, err := r.handleNamespace(ctx, nodesensor, logger)
 	if err != nil {
 		return ctrl.Result{}, err
@@ -1068,4 +1072,25 @@ func (r *FalconNodeSensorReconciler) reconcileObjectWithName(ctx context.Context
 
 func shouldTrackSensorVersions(obj *falconv1alpha1.FalconNodeSensor) bool {
 	return obj.Spec.FalconAPI != nil && obj.Spec.Node.Advanced.IsAutoUpdating()
+}
+
+func (r *FalconNodeSensorReconciler) handleExistingFalconSecret(ctx context.Context, obj *falconv1alpha1.FalconNodeSensor) error {
+	if obj.Spec.Falcon.FalconExistingSecret != nil {
+		existingSecret := &corev1.Secret{}
+		existingSecretData := types.NamespacedName{
+			Name:      obj.Spec.Falcon.FalconExistingSecret.SecretName,
+			Namespace: obj.Spec.Falcon.FalconExistingSecret.Namespace,
+		}
+
+		err := common.GetNamespacedObject(ctx, r.Client, r.Reader, existingSecretData, existingSecret)
+		if errors.IsNotFound(err) {
+			return err
+		}
+
+		clientId, clientSecret, cid := k8sutils.GetFalconCredsFromSecret(ctx, existingSecret, r.Client, r.Reader)
+		obj.Spec.FalconAPI.ClientId = &clientId
+		obj.Spec.FalconAPI.ClientSecret = &clientSecret
+		obj.Spec.FalconAPI.CID = &cid
+	}
+	return nil
 }

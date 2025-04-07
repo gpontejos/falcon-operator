@@ -42,4 +42,15 @@ type FalconSensor struct {
 	// +kubebuilder:default:=none
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Trace Level",order=7
 	Trace string `json:"trace,omitempty"`
+
+	// If neceeary, configure the registry credentials for the Falcon Image Analyzer.
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Falcon Existing Secret",order=5
+	FalconExistingSecret *FalconCreds `json:"falconExistingSecret,omitempty"`
+}
+
+type FalconCreds struct {
+	// Namespace where the falcon secret is located.
+	Namespace string `json:"namespace,omitempty"`
+	// Name of the falcon secret
+	SecretName string `json:"secretName,omitempty"`
 }

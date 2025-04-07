@@ -324,6 +324,22 @@ func NewReconcileTrigger(c controller.Controller) (func(client.Object), error) {
 	}, nil
 }
 
+func GetFalconCredsFromSecret(ctx context.Context, secret *corev1.Secret, apiClient client.Client, apiReader client.Reader) (clientId string, clientSecret string, cid string) {
+	if secret, exists := secret.Data["ClientId"]; exists {
+		clientId = strings.ReplaceAll(string(secret), "\n", "")
+	}
+
+	if secret, exists := secret.Data["ClientSecret"]; exists {
+		clientSecret = strings.ReplaceAll(string(secret), "\n", "")
+	}
+
+	if secret, exists := secret.Data["CID"]; exists {
+		cid = strings.ReplaceAll(string(secret), "\n", "")
+	}
+
+	return clientId, clientSecret, cid
+}
+
 func oLogMessage(kind, obj string) string {
 	return fmt.Sprintf("%s.%s", kind, obj)
 }

@@ -99,15 +99,15 @@ var _ = Describe("FalconDeployment Controller", func() {
 
 		mockFalconAPI := falconv1alpha1.FalconAPI{
 			CloudRegion:  falconCloudRegion,
-			ClientId:     falconClientID,
-			ClientSecret: falconSecret,
+			ClientId:     &falconClientID,
+			ClientSecret: &falconSecret,
 			CID:          &falconCID,
 		}
 
 		overrideFalconAPI := falconv1alpha1.FalconAPI{
 			CloudRegion:  overrideFalconCloudRegion,
-			ClientId:     overrideFalconClientID,
-			ClientSecret: overrideFalconSecret,
+			ClientId:     &overrideFalconClientID,
+			ClientSecret: &overrideFalconSecret,
 			CID:          &overrideFalconCID,
 		}
 
@@ -172,32 +172,32 @@ var _ = Describe("FalconDeployment Controller", func() {
 			falconAdmission := &falconv1alpha1.FalconAdmission{}
 			err = k8sClient.Get(ctx, typeAdmissionNamespacedName, falconAdmission)
 			Expect(err).To(Not(HaveOccurred()))
-			Expect(falconAdmission.Spec.FalconAPI.ClientId).To(Equal(mockFalconAPI.ClientId))
-			Expect(falconAdmission.Spec.FalconAPI.ClientSecret).To(Equal(mockFalconAPI.ClientSecret))
+			Expect(*falconAdmission.Spec.FalconAPI.ClientId).To(Equal(*mockFalconAPI.ClientId))
+			Expect(*falconAdmission.Spec.FalconAPI.ClientSecret).To(Equal(*mockFalconAPI.ClientSecret))
 			Expect(falconAdmission.Spec.FalconAPI.CloudRegion).To(Equal(mockFalconAPI.CloudRegion))
 
 			By("Validate override FalconAPI credentials are used in the child CRs - FalconImageAnalyzer")
 			falconImageAnalyzer := &falconv1alpha1.FalconImageAnalyzer{}
 			err = k8sClient.Get(ctx, typeIARNamespacedName, falconImageAnalyzer)
 			Expect(err).To(Not(HaveOccurred()))
-			Expect(falconImageAnalyzer.Spec.FalconAPI.ClientId).To(Equal(mockFalconAPI.ClientId))
-			Expect(falconImageAnalyzer.Spec.FalconAPI.ClientSecret).To(Equal(mockFalconAPI.ClientSecret))
+			Expect(*falconImageAnalyzer.Spec.FalconAPI.ClientId).To(Equal(*mockFalconAPI.ClientId))
+			Expect(*falconImageAnalyzer.Spec.FalconAPI.ClientSecret).To(Equal(*mockFalconAPI.ClientSecret))
 			Expect(falconImageAnalyzer.Spec.FalconAPI.CloudRegion).To(Equal(mockFalconAPI.CloudRegion))
 
 			By("Validate override FalconAPI credentials are used in the child CRss - FalconNodeSensor")
 			falconNodeSensor := &falconv1alpha1.FalconNodeSensor{}
 			err = k8sClient.Get(ctx, typeNodeNamespacedName, falconNodeSensor)
 			Expect(err).To(Not(HaveOccurred()))
-			Expect(falconNodeSensor.Spec.FalconAPI.ClientId).To(Equal(mockFalconAPI.ClientId))
-			Expect(falconNodeSensor.Spec.FalconAPI.ClientSecret).To(Equal(mockFalconAPI.ClientSecret))
+			Expect(*falconNodeSensor.Spec.FalconAPI.ClientId).To(Equal(*mockFalconAPI.ClientId))
+			Expect(*falconNodeSensor.Spec.FalconAPI.ClientSecret).To(Equal(*mockFalconAPI.ClientSecret))
 			Expect(falconNodeSensor.Spec.FalconAPI.CloudRegion).To(Equal(mockFalconAPI.CloudRegion))
 
 			By("Validate override FalconAPI credentials are used in the child CRs - FalconContainer")
 			falconContainer := &falconv1alpha1.FalconContainer{}
 			err = k8sClient.Get(ctx, typeContainerNamespacedName, falconContainer)
 			Expect(err).To(Not(HaveOccurred()))
-			Expect(falconContainer.Spec.FalconAPI.ClientId).To(Equal(mockFalconAPI.ClientId))
-			Expect(falconContainer.Spec.FalconAPI.ClientSecret).To(Equal(mockFalconAPI.ClientSecret))
+			Expect(*falconContainer.Spec.FalconAPI.ClientId).To(Equal(*mockFalconAPI.ClientId))
+			Expect(*falconContainer.Spec.FalconAPI.ClientSecret).To(Equal(*mockFalconAPI.ClientSecret))
 			Expect(falconContainer.Spec.FalconAPI.CloudRegion).To(Equal(mockFalconAPI.CloudRegion))
 
 			By("Deleting the FalconDeployment to perform the tests")
@@ -266,32 +266,32 @@ var _ = Describe("FalconDeployment Controller", func() {
 			err = k8sClient.Get(ctx, typeAdmissionNamespacedOverrideName, falconAdmission)
 			fmt.Println(falconAdmission.Spec.FalconAPI)
 			Expect(err).To(Not(HaveOccurred()))
-			Expect(falconAdmission.Spec.FalconAPI.ClientId).To(Equal(overrideFalconAPI.ClientId))
-			Expect(falconAdmission.Spec.FalconAPI.ClientSecret).To(Equal(overrideFalconAPI.ClientSecret))
+			Expect(*falconAdmission.Spec.FalconAPI.ClientId).To(Equal(*overrideFalconAPI.ClientId))
+			Expect(*falconAdmission.Spec.FalconAPI.ClientSecret).To(Equal(*overrideFalconAPI.ClientSecret))
 			Expect(falconAdmission.Spec.FalconAPI.CloudRegion).To(Equal(overrideFalconAPI.CloudRegion))
 
 			By("Validate override FalconAPI credentials are used in the child CRs - FalconImageAnalyzer - With Overrides")
 			falconImageAnalyzer = &falconv1alpha1.FalconImageAnalyzer{}
 			err = k8sClient.Get(ctx, typeIARNamespacedOverrideName, falconImageAnalyzer)
 			Expect(err).To(Not(HaveOccurred()))
-			Expect(falconImageAnalyzer.Spec.FalconAPI.ClientId).To(Equal(overrideFalconAPI.ClientId))
-			Expect(falconImageAnalyzer.Spec.FalconAPI.ClientSecret).To(Equal(overrideFalconAPI.ClientSecret))
+			Expect(*falconImageAnalyzer.Spec.FalconAPI.ClientId).To(Equal(*overrideFalconAPI.ClientId))
+			Expect(*falconImageAnalyzer.Spec.FalconAPI.ClientSecret).To(Equal(*overrideFalconAPI.ClientSecret))
 			Expect(falconImageAnalyzer.Spec.FalconAPI.CloudRegion).To(Equal(overrideFalconAPI.CloudRegion))
 
 			By("Validate override FalconAPI credentials are used in the child CRss - FalconNodeSensor - With Overrides")
 			falconNodeSensor = &falconv1alpha1.FalconNodeSensor{}
 			err = k8sClient.Get(ctx, typeNodeNamespacedOverrideName, falconNodeSensor)
 			Expect(err).To(Not(HaveOccurred()))
-			Expect(falconNodeSensor.Spec.FalconAPI.ClientId).To(Equal(overrideFalconAPI.ClientId))
-			Expect(falconNodeSensor.Spec.FalconAPI.ClientSecret).To(Equal(overrideFalconAPI.ClientSecret))
+			Expect(*falconNodeSensor.Spec.FalconAPI.ClientId).To(Equal(*overrideFalconAPI.ClientId))
+			Expect(*falconNodeSensor.Spec.FalconAPI.ClientSecret).To(Equal(*overrideFalconAPI.ClientSecret))
 			Expect(falconNodeSensor.Spec.FalconAPI.CloudRegion).To(Equal(overrideFalconAPI.CloudRegion))
 
 			By("Validate override FalconAPI credentials are used in the child CRs - FalconContainer - With Overrides")
 			falconContainer = &falconv1alpha1.FalconContainer{}
 			err = k8sClient.Get(ctx, typeContainerNamespacedOverrideName, falconContainer)
 			Expect(err).To(Not(HaveOccurred()))
-			Expect(falconContainer.Spec.FalconAPI.ClientId).To(Equal(overrideFalconAPI.ClientId))
-			Expect(falconContainer.Spec.FalconAPI.ClientSecret).To(Equal(overrideFalconAPI.ClientSecret))
+			Expect(*falconContainer.Spec.FalconAPI.ClientId).To(Equal(*overrideFalconAPI.ClientId))
+			Expect(*falconContainer.Spec.FalconAPI.ClientSecret).To(Equal(*overrideFalconAPI.ClientSecret))
 			Expect(falconContainer.Spec.FalconAPI.CloudRegion).To(Equal(overrideFalconAPI.CloudRegion))
 
 		})

@@ -73,12 +73,12 @@ func (r *FalconImageAnalyzerReconciler) newConfigMap(ctx context.Context, name s
 		}
 	}
 
-	if falconImageAnalyzer.Spec.FalconAPI.ClientId != "" {
-		data["AGENT_CLIENT_ID"] = falconImageAnalyzer.Spec.FalconAPI.ClientId
+	if falconImageAnalyzer.Spec.FalconAPI.ClientId != nil {
+		data["AGENT_CLIENT_ID"] = *falconImageAnalyzer.Spec.FalconAPI.ClientId
 	}
 
-	if falconImageAnalyzer.Spec.FalconAPI.ClientId != "" {
-		data["AGENT_CLIENT_SECRET"] = falconImageAnalyzer.Spec.FalconAPI.ClientSecret
+	if falconImageAnalyzer.Spec.FalconAPI.ClientId != nil {
+		data["AGENT_CLIENT_SECRET"] = *falconImageAnalyzer.Spec.FalconAPI.ClientSecret
 	}
 
 	if falconImageAnalyzer.Spec.FalconAPI.CloudRegion != "" {
