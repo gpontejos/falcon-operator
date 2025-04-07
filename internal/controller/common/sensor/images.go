@@ -9,7 +9,9 @@ import (
 
 	"github.com/crowdstrike/falcon-operator/pkg/registry/falcon_registry"
 	"github.com/crowdstrike/gofalcon/falcon"
+	"github.com/crowdstrike/gofalcon/falcon/client/hosts"
 	"github.com/crowdstrike/gofalcon/falcon/client/sensor_update_policies"
+
 	"github.com/crowdstrike/gofalcon/falcon/models"
 	"github.com/go-logr/logr"
 	"github.com/go-openapi/swag"
@@ -29,6 +31,7 @@ type ImageRepository struct {
 	api                   sensorUpdatePoliciesAPI
 	getSystemArchitecture func() string
 	tags                  tagRegistry
+	devices               devicesAPI
 }
 
 func NewImageRepository(ctx context.Context, apiConfig *falcon.ApiConfig) (ImageRepository, error) {
@@ -46,15 +49,16 @@ func NewImageRepository(ctx context.Context, apiConfig *falcon.ApiConfig) (Image
 		api:                   apiClient.SensorUpdatePolicies,
 		getSystemArchitecture: func() string { return runtime.GOARCH },
 		tags:                  registry,
+		devices:               apiClient.Hosts,
 	}, nil
 }
 
-func (images ImageRepository) GetPreferredImage(ctx context.Context, sensorType falcon.SensorType, versionSpec *string, updatePolicySpec *string) (string, error) {
+func (images ImageRepository) GetPreferredImage(ctx context.Context, sensorType falcon.SensorType, versionSpec *string, updatePolicySpec *string, aid string) (string, error) {
 	logger := log.FromContext(ctx).
 		WithValues("architecture", images.getSystemArchitecture()).
 		WithValues("sensorType", sensorType)
 
-	version, err := images.getPreferredSensorVersion(versionSpec, updatePolicySpec, logger)
+	version, err := images.getPreferredSensorVersion(versionSpec, updatePolicySpec, aid, logger)
 	if err != nil {
 		return "", err
 	}
@@ -114,10 +118,22 @@ func (images ImageRepository) getImageTagForSensorVersion(ctx context.Context, s
 	return images.tags.LastContainerTag(ctx, sensorType, version)
 }
 
-func (images ImageRepository) getPreferredSensorVersion(versionSpec *string, updatePolicySpec *string, logger logr.Logger) (*string, error) {
+func (images ImageRepository) getPreferredSensorVersion(versionSpec *string, updatePolicySpec *string, aid string, logger logr.Logger) (*string, error) {
 	if versionSpec != nil && *versionSpec != "" {
 		logger.Info("requested specific sensor version", "version", *versionSpec)
 		return versionSpec, nil
+	}
+
+	logger.Info("Inside getPreferredSensorVersion", "aid", aid)
+
+	if aid != "" {
+		logger.Info("requested sensor version from host group via aid")
+		version, err := images.GetSensorVersionByAID(aid)
+		if err != nil {
+			return nil, err
+		}
+		logger.Info("version selected by host group policy", "version", version)
+		return &version, nil
 	}
 
 	if updatePolicySpec != nil && *updatePolicySpec != "" {
@@ -219,6 +235,44 @@ func (filter falconFilter) encode() string {
 	return strings.Join(filter.clauses, "+")
 }
 
+func (images ImageRepository) GetSensorVersionByAID(aid string) (string, error) {
+	sensorUpdatePolicyID, err := images.getSensorUpdatePolicyIDbyAID(aid)
+
+	if err != nil {
+		sensorUpdatePolicyID, err = images.findPolicy("platform_default")
+		if err != nil {
+			return "", err
+		}
+	}
+
+	version, err := images.getSensorVersionForPolicy(sensorUpdatePolicyID)
+	if err == errInvalidSensorVersion {
+		return "", fmt.Errorf("update-policy with ID %s has an invalid sensor version", sensorUpdatePolicyID)
+	} else if err == errSensorVersionNotFound {
+		return "", fmt.Errorf("update-policy with ID %s contains no version for system architecture %s", sensorUpdatePolicyID, images.getSystemArchitecture())
+	} else if err != nil {
+		return "", err
+	}
+
+	return version, nil
+}
+
+func (images ImageRepository) getSensorUpdatePolicyIDbyAID(aid string) (string, error) {
+	params := hosts.NewPostDeviceDetailsV2Params().WithBody(&models.MsaIdsRequest{Ids: []string{aid}})
+	response, err := images.devices.PostDeviceDetailsV2(params)
+	if err != nil {
+		return "", fmt.Errorf("no policy id found for AID %s", aid)
+	}
+
+	fmt.Printf("response from post PostDeviceDetailsV2: %s", response)
+
+	if response.Payload.Resources[0].DevicePolicies.SensorUpdate.PolicyID == nil {
+		return "", nil
+	}
+
+	return *response.Payload.Resources[0].DevicePolicies.SensorUpdate.PolicyID, nil
+}
+
 type sensorUpdatePoliciesAPI interface {
 	GetSensorUpdatePoliciesV2(params *sensor_update_policies.GetSensorUpdatePoliciesV2Params, opts ...sensor_update_policies.ClientOption) (*sensor_update_policies.GetSensorUpdatePoliciesV2OK, error)
 	QuerySensorUpdatePolicies(params *sensor_update_policies.QuerySensorUpdatePoliciesParams, opts ...sensor_update_policies.ClientOption) (*sensor_update_policies.QuerySensorUpdatePoliciesOK, error)
@@ -227,4 +281,8 @@ type sensorUpdatePoliciesAPI interface {
 type tagRegistry interface {
 	LastContainerTag(ctx context.Context, sensorType falcon.SensorType, versionRequested *string) (string, error)
 	LastNodeTag(ctx context.Context, versionRequested *string) (string, error)
+}
+
+type devicesAPI interface {
+	PostDeviceDetailsV2(params *hosts.PostDeviceDetailsV2Params, opts ...hosts.ClientOption) (*hosts.PostDeviceDetailsV2OK, error)
 }

@@ -3,6 +3,7 @@ package sensorversion
 import (
 	"context"
 
+	"github.com/crowdstrike/falcon-operator/internal/controller/common/sensor"
 	"github.com/crowdstrike/falcon-operator/pkg/registry/falcon_registry"
 	"github.com/crowdstrike/gofalcon/falcon"
 )
@@ -10,6 +11,17 @@ import (
 func NewFalconCloudQuery(sensorType falcon.SensorType, apiConfig *falcon.ApiConfig) SensorVersionQuery {
 	return func(ctx context.Context) (string, error) {
 		return getLatestSensorVersion(ctx, sensorType, apiConfig)
+	}
+}
+
+func NewFalconCloudByAidQuery(aid string, apiConfig *falcon.ApiConfig) SensorVersionQuery {
+	return func(ctx context.Context) (string, error) {
+		apiConfig.Context = ctx
+		imageRepo, err := sensor.NewImageRepository(ctx, apiConfig)
+		if err != nil {
+			return "", err
+		}
+		return imageRepo.GetSensorVersionByAID(aid)
 	}
 }
 

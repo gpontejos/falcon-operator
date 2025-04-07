@@ -124,12 +124,15 @@ func TestSensorEnvVars(t *testing.T) {
 }
 
 func TestNewConfigCache(t *testing.T) {
+	var logger logr.Logger
+
 	want := ConfigCache{cid: falconCID, nodesensor: &falconNode}
 
 	falconNode.Spec.FalconAPI = nil
 	falconNode.Spec.Falcon.CID = &falconCID
+	aid := ""
 
-	newCache, err := NewConfigCache(context.Background(), &falconNode)
+	newCache, err := NewConfigCache(context.Background(), logger, &falconNode, aid)
 	if err != nil {
 		t.Errorf("NewConfigCache() error: %v", err)
 	}
@@ -139,7 +142,7 @@ func TestNewConfigCache(t *testing.T) {
 	}
 
 	config.nodesensor.Spec.FalconAPI = newTestFalconAPI(&falconCID)
-	newCache, err = NewConfigCache(context.Background(), &falconNode)
+	newCache, err = NewConfigCache(context.Background(), logger, &falconNode, aid)
 	if err != nil {
 		t.Errorf("NewConfigCache() error: %v", err)
 	}
@@ -165,7 +168,7 @@ func TestGetFalconImage(t *testing.T) {
 
 	testVersion := "testVersion"
 	falconNode.Spec.Node.Version = &testVersion
-	got, err := testConfig.getFalconImage(context.Background(), &falconNode)
+	got, err := config.getFalconImage(context.Background(), &falconNode)
 	if err != nil {
 		if strings.Contains(err.Error(), "401 Unauthorized") {
 			got = fmt.Sprintf("%s:%s", "TestImageEnv", *falconNode.Spec.Node.Version)
@@ -177,7 +180,7 @@ func TestGetFalconImage(t *testing.T) {
 	}
 
 	falconNode.Spec.FalconAPI = nil
-	_, err = testConfig.getFalconImage(context.Background(), &falconNode)
+	_, err = config.getFalconImage(context.Background(), &falconNode)
 	if err != nil {
 		if err != ErrFalconAPINotConfigured {
 			t.Errorf("getFalconImage() error: %v", err)
@@ -190,7 +193,7 @@ func TestGetFalconImage(t *testing.T) {
 	}
 
 	want := "TestImageEnv"
-	got, err = testConfig.getFalconImage(context.Background(), &falconNode)
+	got, err = config.getFalconImage(context.Background(), &falconNode)
 	if err != nil {
 		t.Errorf("getFalconImage() error: %v", err)
 	}
@@ -201,7 +204,7 @@ func TestGetFalconImage(t *testing.T) {
 	want = "TestImageOverride"
 	falconNode.Spec.Node.Image = want
 
-	got, err = testConfig.getFalconImage(context.Background(), &falconNode)
+	got, err = config.getFalconImage(context.Background(), &falconNode)
 	if err != nil {
 		t.Errorf("getFalconImage() error: %v", err)
 	}

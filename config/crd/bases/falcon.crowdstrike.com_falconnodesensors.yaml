@@ -184,6 +184,12 @@ spec:
                         - normal
                         - force
                         type: string
+                      autoUpdateFromHostGroup:
+                        default: false
+                        description: |-
+                          Setting this to true requires the sensor to be tagged.
+                          If no sensor ID is found the latest image will be pulled by default
+                        type: boolean
                       updatePolicy:
                         description: UpdatePolicy is the name of a sensor update policy
                           configured and enabled in Falcon UI. It is ignored when

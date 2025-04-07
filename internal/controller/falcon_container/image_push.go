@@ -218,7 +218,7 @@ func (r *FalconContainerReconciler) setImageTag(ctx context.Context, falconConta
 		return "", err
 	}
 
-	tag, err := imageRepo.GetPreferredImage(ctx, falcon.SidecarSensor, falconContainer.Spec.Version, falconContainer.Spec.Advanced.UpdatePolicy)
+	tag, err := imageRepo.GetPreferredImage(ctx, falcon.SidecarSensor, falconContainer.Spec.Version, falconContainer.Spec.Advanced.UpdatePolicy, "")
 	if err == nil {
 		falconContainer.Status.Sensor = common.ImageVersion(tag)
 	}

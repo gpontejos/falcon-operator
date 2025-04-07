@@ -268,9 +268,10 @@ func main() {
 		os.Exit(1)
 	}
 	if err = (&nodecontroller.FalconNodeSensorReconciler{
-		Client: mgr.GetClient(),
-		Reader: mgr.GetAPIReader(),
-		Scheme: mgr.GetScheme(),
+		Client:     mgr.GetClient(),
+		Reader:     mgr.GetAPIReader(),
+		Scheme:     mgr.GetScheme(),
+		RestConfig: mgr.GetConfig(),
 	}).SetupWithManager(mgr, tracker); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "FalconNodeSensor")
 		os.Exit(1)

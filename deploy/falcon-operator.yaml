@@ -1016,6 +1016,12 @@ spec:
                     - normal
                     - force
                     type: string
+                  autoUpdateFromHostGroup:
+                    default: false
+                    description: |-
+                      Setting this to true requires the sensor to be tagged.
+                      If no sensor ID is found the latest image will be pulled by default
+                    type: boolean
                   updatePolicy:
                     description: UpdatePolicy is the name of a sensor update policy
                       configured and enabled in Falcon UI. It is ignored when Image
@@ -4329,6 +4335,12 @@ spec:
                         - normal
                         - force
                         type: string
+                      autoUpdateFromHostGroup:
+                        default: false
+                        description: |-
+                          Setting this to true requires the sensor to be tagged.
+                          If no sensor ID is found the latest image will be pulled by default
+                        type: boolean
                       updatePolicy:
                         description: UpdatePolicy is the name of a sensor update policy
                           configured and enabled in Falcon UI. It is ignored when
@@ -7112,6 +7124,12 @@ spec:
                             - normal
                             - force
                             type: string
+                          autoUpdateFromHostGroup:
+                            default: false
+                            description: |-
+                              Setting this to true requires the sensor to be tagged.
+                              If no sensor ID is found the latest image will be pulled by default
+                            type: boolean
                           updatePolicy:
                             description: UpdatePolicy is the name of a sensor update
                               policy configured and enabled in Falcon UI. It is ignored
@@ -8320,6 +8338,12 @@ spec:
                         - normal
                         - force
                         type: string
+                      autoUpdateFromHostGroup:
+                        default: false
+                        description: |-
+                          Setting this to true requires the sensor to be tagged.
+                          If no sensor ID is found the latest image will be pulled by default
+                        type: boolean
                       updatePolicy:
                         description: UpdatePolicy is the name of a sensor update policy
                           configured and enabled in Falcon UI. It is ignored when
@@ -9121,6 +9145,67 @@ rules:
   - update
   - watch
 - apiGroups:
+  - ""
+  resources:
+  - pods/exec
+  - serviceaccounts
+  verbs:
+  - create
+  - get
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - replicationcontrollers
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - resourcequotas
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - serviceaccounts
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - services
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - update
+  - watch
+- apiGroups:
   - admissionregistration.k8s.io
   resources:
   - mutatingwebhookconfigurations
@@ -9388,6 +9473,7 @@ spec:
       containers:
       - args:
         - --leader-elect
+        - --sensor-auto-update-interval=30s
         command:
         - /manager
         env:

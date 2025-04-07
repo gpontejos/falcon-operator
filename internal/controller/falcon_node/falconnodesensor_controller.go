@@ -4,7 +4,10 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"regexp"
 	"slices"
+	"strings"
+	"time"
 
 	falconv1alpha1 "github.com/crowdstrike/falcon-operator/api/falcon/v1alpha1"
 	"github.com/crowdstrike/falcon-operator/internal/controller/assets"
@@ -29,6 +32,7 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/util/retry"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -42,6 +46,7 @@ type FalconNodeSensorReconciler struct {
 	Reader          client.Reader
 	Log             logr.Logger
 	Scheme          *runtime.Scheme
+	RestConfig      *rest.Config
 	reconcileObject func(client.Object)
 	tracker         sensorversion.Tracker
 }
@@ -64,6 +69,14 @@ func (r *FalconNodeSensorReconciler) SetupWithManager(mgr ctrl.Manager, tracker 
 	}
 
 	r.tracker = tracker
+
+	if err := mgr.GetFieldIndexer().IndexField(context.Background(), &corev1.Pod{}, "status.phase", func(rawObj client.Object) []string {
+		pod := rawObj.(*corev1.Pod)
+		return []string{string(pod.Status.Phase)}
+	}); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -75,7 +88,7 @@ func (r *FalconNodeSensorReconciler) SetupWithManager(mgr ctrl.Manager, tracker 
 //+kubebuilder:rbac:groups=apps,resources=daemonsets,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=core,resources=configmaps,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=coordination.k8s.io,resources=leases,verbs=get;list;create;update
-//+kubebuilder:rbac:groups="",resources=serviceaccounts,verbs=get;create;update
+//+kubebuilder:rbac:groups="",resources=serviceaccounts;pods/exec,verbs=get;create;update
 //+kubebuilder:rbac:groups="",resources=namespaces,verbs=get;list;watch
 //+kubebuilder:rbac:groups="rbac.authorization.k8s.io",resources=clusterrolebindings,verbs=get;list;watch;create
 //+kubebuilder:rbac:groups="security.openshift.io",resources=securitycontextconstraints,resourceNames=privileged,verbs=use
@@ -205,7 +218,9 @@ func (r *FalconNodeSensorReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		}
 	}
 
-	config, err := node.NewConfigCache(ctx, nodesensor)
+	aid, _ := r.getAID(ctx, nodesensor, logger)
+	config, err := node.NewConfigCache(ctx, logger, nodesensor, aid)
+
 	if err != nil {
 		return ctrl.Result{}, err
 	}
@@ -263,6 +278,7 @@ func (r *FalconNodeSensorReconciler) Reconcile(ctx context.Context, req ctrl.Req
 	if err != nil {
 		return ctrl.Result{}, err
 	}
+	log.Info("Image URI found during reconcile", "GetImageURI", image)
 
 	// Check if the daemonset already exists, if not create a new one
 	daemonset := &appsv1.DaemonSet{}
@@ -316,6 +332,33 @@ func (r *FalconNodeSensorReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		logger.Error(err, "error getting DaemonSet")
 		return ctrl.Result{}, err
 	} else {
+		if nodesensor.Spec.Node.Advanced.AutoUpdateFromHostGroup {
+			if terminated := nodesensor.GetDeletionTimestamp(); terminated == nil {
+				aid, _ = r.getAID(ctx, nodesensor, logger)
+				if aid != "" {
+					config.UpdateAID(aid)
+					image, err = config.GetImageURI(ctx, logger)
+					if err != nil {
+						return ctrl.Result{}, err
+					}
+					log.Info("Image URI found during reconcile - auto update host group", "GetImageURI", image)
+					runningSensorVersion, err := r.getRunningSensorVersion(ctx, nodesensor, logger)
+					if err != nil {
+						logger.Error(err, "Failed to get running sensor version")
+					}
+					if runningSensorVersion != "" {
+						logger.Info("Get sensor version from daemonset", "versionFound", runningSensorVersion)
+						re := regexp.MustCompile(runningSensorVersion)
+						if match := re.FindStringSubmatch(image); len(match) > 0 {
+							logger.Info("Sensor version is up-to-date with sensor control policy", "versionFound", match[0])
+						} else {
+							logger.Info("Sensor version not up-to-date with sensor control policy. Requeueing for sensor version update...", "runningVersion", runningSensorVersion)
+						}
+					}
+				}
+			}
+		}
+
 		// Copy Daemonset for updates
 		dsUpdate := daemonset.DeepCopy()
 		dsTarget := assets.Daemonset(dsUpdate.Name, image, serviceAccount, nodesensor)
@@ -365,6 +408,21 @@ func (r *FalconNodeSensorReconciler) Reconcile(ctx context.Context, req ctrl.Req
 			}
 			logger.Info("FalconNodeSensor DaemonSet configuration changed. Pods have been restarted.")
 		}
+	}
+
+	if shouldTrackSensorVersions(nodesensor) {
+		switch {
+		case nodesensor.Spec.Node.Advanced.UpdatePolicy != nil:
+			getSensorVersion := sensorversion.NewFalconCloudQuery(falcon.NodeSensor, nodesensor.Spec.FalconAPI.ApiConfig())
+			r.tracker.Track(req.NamespacedName, getSensorVersion, r.reconcileObjectWithName, nodesensor.Spec.Node.Advanced.IsAutoUpdatingForced())
+		case nodesensor.Spec.Node.Advanced.AutoUpdateFromHostGroup:
+			if config.AID() != "" {
+				getSensorVersion := sensorversion.NewFalconCloudByAidQuery(aid, nodesensor.Spec.FalconAPI.ApiConfig())
+				r.tracker.Track(req.NamespacedName, getSensorVersion, r.reconcileObjectWithName, nodesensor.Spec.Node.Advanced.IsAutoUpdatingForced())
+			}
+		}
+	} else {
+		r.tracker.StopTracking(req.NamespacedName)
 	}
 
 	imgVer := common.ImageVersion(image)
@@ -1104,7 +1162,110 @@ func (r *FalconNodeSensorReconciler) reconcileObjectWithName(ctx context.Context
 }
 
 func shouldTrackSensorVersions(obj *falconv1alpha1.FalconNodeSensor) bool {
-	return obj.Spec.FalconAPI != nil && obj.Spec.Node.Advanced.IsAutoUpdating()
+	return obj.Spec.FalconAPI != nil && obj.Spec.Node.Advanced.IsAutoUpdating() || obj.Spec.Node.Advanced.AutoUpdateFromHostGroup
+}
+
+func (r *FalconNodeSensorReconciler) getAID(ctx context.Context, nodesensor *falconv1alpha1.FalconNodeSensor, logger logr.Logger) (string, error) {
+	var aid string
+	maxRetries := 3
+	var cmdOutput string
+	var err error
+	re := regexp.MustCompile(`aid="([\d\w]+)`)
+
+	for attempt := 1; attempt <= maxRetries; attempt++ {
+		cmdOutput, err = r.executeCommandInDaemonSetPod(ctx, nodesensor, logger, []string{"/opt/CrowdStrike/falconctl", "-g", "--aid"})
+		if err != nil || cmdOutput == "" {
+			logger.Info("unable to get AID. skipping...", "attempt", attempt, "error", err)
+			break
+		}
+
+		match := re.FindStringSubmatch(cmdOutput)
+		logger.Info("AID match command output", "cmdOutput", match)
+		logger.Info("AID match from regex", "regexOutout", match)
+		if len(match) > 1 {
+			aid = match[1]
+			logger.Info("AID found", "aid", aid)
+			break
+		} else {
+			logger.Info("empty AID output, retrying...", "attempt", attempt)
+			time.Sleep(time.Second * 5) // Add a small delay between retries
+		}
+	}
+
+	if err != nil || cmdOutput == "" {
+		logger.Info("all attempts to get AID failed. skipping...")
+		return "", err
+	}
+
+	return aid, nil
+}
+
+func (r *FalconNodeSensorReconciler) getRunningSensorVersion(ctx context.Context, nodesensor *falconv1alpha1.FalconNodeSensor, logger logr.Logger) (string, error) {
+	var version string
+	var cmdOutput string
+	maxRetries := 3
+	var err error
+	re := regexp.MustCompile(`version = ([\d\w\.]+)`)
+
+	for attempt := 1; attempt <= maxRetries; attempt++ {
+		cmdOutput, err = r.executeCommandInDaemonSetPod(ctx, nodesensor, logger, []string{"/opt/CrowdStrike/falconctl", "-g", "--version"})
+		if err != nil || cmdOutput == "" {
+			logger.Info("unable to get Version. skipping...", "attempt", attempt, "error", err)
+			break
+		}
+
+		match := re.FindStringSubmatch(cmdOutput)
+		logger.Info("Version found from running sensor - cmdOutput", "cmdOutput", cmdOutput)
+		logger.Info("Version found from running sensor - regex", "match", match)
+		if len(match) > 0 {
+			version = match[0]
+			parts := strings.Split(version, ".")
+			version = fmt.Sprintf("%s.%s.0-%s", parts[0], parts[1], parts[2])
+			break
+		} else {
+			logger.Info("empty Version output, retrying...", "attempt", attempt)
+			time.Sleep(time.Second * 2) // Add a small delay between retries
+		}
+	}
+
+	if err != nil || cmdOutput == "" {
+		logger.Info("all attempts to get Version failed. skipping...")
+		return "", err
+	}
+	return version, nil
+}
+
+func (r *FalconNodeSensorReconciler) executeCommandInDaemonSetPod(ctx context.Context, nodesensor *falconv1alpha1.FalconNodeSensor, logger logr.Logger, command []string) (string, error) {
+	name := nodesensor.Name
+	namespace := nodesensor.Spec.InstallNamespace
+
+	// Get the DaemonSet
+	var ds appsv1.DaemonSet
+	if err := r.Get(ctx, client.ObjectKey{Namespace: namespace, Name: name}, &ds); err != nil {
+		return "", fmt.Errorf("failed to get DaemonSet to execute command: %w", err)
+	}
+
+	// List pods created by the DaemonSet
+	var podList corev1.PodList
+	if err := r.List(ctx, &podList, client.InNamespace(namespace), client.MatchingLabels(ds.Spec.Selector.MatchLabels), client.MatchingFields{"status.phase": "Running"}); err != nil {
+		return "", fmt.Errorf("failed to list pods to execute command in daemonset: %w", err)
+	}
+
+	if len(podList.Items) == 0 {
+		logger.Info("container not ready. skipping command to run in daemonset container")
+		return "", nil
+	}
+
+	// Use the first pod in the list
+	pod := podList.Items[0]
+
+	// Execute the command
+	stdout, stderr, err := k8sutils.ExecuteCommandInPod(ctx, r.RestConfig, namespace, pod.Name, pod.Spec.Containers[0].Name, command)
+	if err != nil {
+		return "", fmt.Errorf("failed to execute command in daemonset: %w, stderr: %s", err, stderr)
+	}
+
+	return stdout, nil
 }
 
 func (r *FalconNodeSensorReconciler) injectFalconSecretData(ctx context.Context, nodeSensor *falconv1alpha1.FalconNodeSensor, logger logr.Logger) error {

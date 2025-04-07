@@ -22,6 +22,12 @@ type FalconAdvanced struct {
 	// +kubebuilder:validation:Enum=off;normal;force
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Falcon Sensor Automatic Updates",order=2
 	AutoUpdate *string `json:"autoUpdate,omitempty"`
+
+	// Setting this to true requires the sensor to be tagged.
+	// If no sensor ID is found the latest image will be pulled by default
+	// +kubebuilder:default=false
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Falcon Sensor Automatic Update by Host Group",order=3
+	AutoUpdateFromHostGroup bool `json:"autoUpdateFromHostGroup,omitempty"`
 }
 
 func (advanced FalconAdvanced) GetUpdatePolicy() string {

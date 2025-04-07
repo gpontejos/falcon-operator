@@ -24,35 +24,21 @@ type ConfigCache struct {
 	cid             string
 	imageUri        string
 	nodesensor      *falconv1alpha1.FalconNodeSensor
+	aid             string
 	falconApiConfig *falcon.ApiConfig
-}
-
-func NewConfigCache(ctx context.Context, nodesensor *falconv1alpha1.FalconNodeSensor) (*ConfigCache, error) {
-	var err error
-	cache := ConfigCache{
-		nodesensor: nodesensor,
-	}
-
-	if nodesensor.Spec.FalconAPI != nil {
-		cache.falconApiConfig = nodesensor.Spec.FalconAPI.ApiConfig()
-
-		if nodesensor.Spec.FalconAPI.CID != nil {
-			cache.cid = *nodesensor.Spec.FalconAPI.CID
-		}
-	}
-
-	if cache.cid == "" {
-		cache.cid, err = falcon_api.FalconCID(ctx, nodesensor.Spec.Falcon.CID, cache.falconApiConfig)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return &cache, nil
 }
 
 func (cc *ConfigCache) CID() string {
 	return cc.cid
+}
+
+func (cc *ConfigCache) AID() string {
+	return cc.aid
+}
+
+func (cc *ConfigCache) UpdateAID(aid string) string {
+	cc.aid = aid
+	return aid
 }
 
 func (cc *ConfigCache) UsingCrowdStrikeRegistry() bool {
@@ -64,7 +50,8 @@ func (cc *ConfigCache) UsingCrowdStrikeRegistry() bool {
 
 func (cc *ConfigCache) GetImageURI(ctx context.Context, logger logr.Logger) (string, error) {
 	var err error
-	if cc.imageUri == "" {
+	if cc.imageUri == "" || cc.aid != "" {
+		logger.Info("Getting new image with AID", "aid", cc.aid)
 		cc.imageUri, err = cc.getFalconImage(ctx, cc.nodesensor)
 		if err == nil {
 			logger.Info("Identified Falcon Node Image", "reference", cc.imageUri)
@@ -91,7 +78,33 @@ func (cc *ConfigCache) SensorEnvVars() map[string]string {
 	return sensorConfig
 }
 
+func NewConfigCache(ctx context.Context, logger logr.Logger, nodesensor *falconv1alpha1.FalconNodeSensor, aid string) (*ConfigCache, error) {
+	var apiConfig *falcon.ApiConfig
+	var err error
+	cache := ConfigCache{
+		nodesensor: nodesensor,
+		aid:        aid,
+	}
+
+	if nodesensor.Spec.FalconAPI != nil {
+		apiConfig = nodesensor.Spec.FalconAPI.ApiConfig()
+		if nodesensor.Spec.FalconAPI.CID != nil {
+			cache.cid = *nodesensor.Spec.FalconAPI.CID
+		}
+	}
+
+	if cache.cid == "" {
+		cache.cid, err = falcon_api.FalconCID(ctx, nodesensor.Spec.Falcon.CID, apiConfig)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return &cache, nil
+}
+
 func (cc *ConfigCache) getFalconImage(ctx context.Context, nodesensor *falconv1alpha1.FalconNodeSensor) (string, error) {
+	fmt.Println("Inside getFalconImage")
 	if nodesensor.Spec.Node.Image != "" {
 		return nodesensor.Spec.Node.Image, nil
 	}
@@ -115,14 +128,16 @@ func (cc *ConfigCache) getFalconImage(ctx context.Context, nodesensor *falconv1a
 		return fmt.Sprintf("%s:%s", imageUri, *nodesensor.Status.Sensor), nil
 	}
 
-	apiConfig := *cc.falconApiConfig
+	fmt.Println("Inside getFalconImage - set apiConfig")
+	apiConfig := nodesensor.Spec.FalconAPI.ApiConfig()
 	apiConfig.Context = ctx
-	imageRepo, err := sensor.NewImageRepository(ctx, &apiConfig)
+	imageRepo, err := sensor.NewImageRepository(ctx, apiConfig)
 	if err != nil {
 		return "", err
 	}
 
-	imageTag, err := imageRepo.GetPreferredImage(ctx, falcon.NodeSensor, nodesensor.Spec.Node.Version, nodesensor.Spec.Node.Advanced.UpdatePolicy)
+	fmt.Println("Inside getFalconImage - running GetPreferredImage")
+	imageTag, err := imageRepo.GetPreferredImage(ctx, falcon.NodeSensor, nodesensor.Spec.Node.Version, nodesensor.Spec.Node.Advanced.UpdatePolicy, cc.aid)
 	if err != nil {
 		return "", err
 	}
@@ -131,7 +146,7 @@ func (cc *ConfigCache) getFalconImage(ctx context.Context, nodesensor *falconv1a
 }
 
 func versionLock(nodesensor *falconv1alpha1.FalconNodeSensor) bool {
-	if nodesensor.Status.Sensor == nil || nodesensor.Spec.Node.Advanced.HasUpdatePolicy() || nodesensor.Spec.Node.Advanced.IsAutoUpdating() {
+	if nodesensor.Status.Sensor == nil || nodesensor.Spec.Node.Advanced.HasUpdatePolicy() || nodesensor.Spec.Node.Advanced.IsAutoUpdating() || nodesensor.Spec.Node.Advanced.AutoUpdateFromHostGroup {
 		return false
 	}
 
