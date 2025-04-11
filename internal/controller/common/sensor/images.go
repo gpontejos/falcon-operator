@@ -237,13 +237,18 @@ func (filter falconFilter) encode() string {
 
 func (images ImageRepository) GetSensorVersionByAID(aid string) (string, error) {
 	sensorUpdatePolicyID, err := images.getSensorUpdatePolicyIDbyAID(aid)
-
 	if err != nil {
+		return "", err
+	}
+
+	if sensorUpdatePolicyID != "" {
 		sensorUpdatePolicyID, err = images.findPolicy("platform_default")
 		if err != nil {
 			return "", err
 		}
 	}
+
+	fmt.Printf("platform_default sensorUpdatePolicyID: %s", sensorUpdatePolicyID)
 
 	version, err := images.getSensorVersionForPolicy(sensorUpdatePolicyID)
 	if err == errInvalidSensorVersion {
@@ -263,10 +268,11 @@ func (images ImageRepository) getSensorUpdatePolicyIDbyAID(aid string) (string, 
 	if err != nil {
 		return "", fmt.Errorf("no policy id found for AID %s", aid)
 	}
+	for i, resource := range response.Payload.Resources {
+		fmt.Printf("response from post PostDeviceDetailsV2 index %d - %+v", i, *resource)
+	}
 
-	fmt.Printf("response from post PostDeviceDetailsV2: %s", response)
-
-	if response.Payload.Resources[0].DevicePolicies.SensorUpdate.PolicyID == nil {
+	if response.Payload.Resources[0].DevicePolicies == nil {
 		return "", nil
 	}
 

@@ -332,33 +332,6 @@ func (r *FalconNodeSensorReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		logger.Error(err, "error getting DaemonSet")
 		return ctrl.Result{}, err
 	} else {
-		if nodesensor.Spec.Node.Advanced.AutoUpdateFromHostGroup {
-			if terminated := nodesensor.GetDeletionTimestamp(); terminated == nil {
-				aid, _ = r.getAID(ctx, nodesensor, logger)
-				if aid != "" {
-					config.UpdateAID(aid)
-					image, err = config.GetImageURI(ctx, logger)
-					if err != nil {
-						return ctrl.Result{}, err
-					}
-					log.Info("Image URI found during reconcile - auto update host group", "GetImageURI", image)
-					runningSensorVersion, err := r.getRunningSensorVersion(ctx, nodesensor, logger)
-					if err != nil {
-						logger.Error(err, "Failed to get running sensor version")
-					}
-					if runningSensorVersion != "" {
-						logger.Info("Get sensor version from daemonset", "versionFound", runningSensorVersion)
-						re := regexp.MustCompile(runningSensorVersion)
-						if match := re.FindStringSubmatch(image); len(match) > 0 {
-							logger.Info("Sensor version is up-to-date with sensor control policy", "versionFound", match[0])
-						} else {
-							logger.Info("Sensor version not up-to-date with sensor control policy. Requeueing for sensor version update...", "runningVersion", runningSensorVersion)
-						}
-					}
-				}
-			}
-		}
-
 		// Copy Daemonset for updates
 		dsUpdate := daemonset.DeepCopy()
 		dsTarget := assets.Daemonset(dsUpdate.Name, image, serviceAccount, nodesensor)
@@ -408,21 +381,6 @@ func (r *FalconNodeSensorReconciler) Reconcile(ctx context.Context, req ctrl.Req
 			}
 			logger.Info("FalconNodeSensor DaemonSet configuration changed. Pods have been restarted.")
 		}
-	}
-
-	if shouldTrackSensorVersions(nodesensor) {
-		switch {
-		case nodesensor.Spec.Node.Advanced.UpdatePolicy != nil:
-			getSensorVersion := sensorversion.NewFalconCloudQuery(falcon.NodeSensor, nodesensor.Spec.FalconAPI.ApiConfig())
-			r.tracker.Track(req.NamespacedName, getSensorVersion, r.reconcileObjectWithName, nodesensor.Spec.Node.Advanced.IsAutoUpdatingForced())
-		case nodesensor.Spec.Node.Advanced.AutoUpdateFromHostGroup:
-			if config.AID() != "" {
-				getSensorVersion := sensorversion.NewFalconCloudByAidQuery(aid, nodesensor.Spec.FalconAPI.ApiConfig())
-				r.tracker.Track(req.NamespacedName, getSensorVersion, r.reconcileObjectWithName, nodesensor.Spec.Node.Advanced.IsAutoUpdatingForced())
-			}
-		}
-	} else {
-		r.tracker.StopTracking(req.NamespacedName)
 	}
 
 	imgVer := common.ImageVersion(image)
@@ -492,6 +450,50 @@ func (r *FalconNodeSensorReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		}
 		log.Info("Adding finalizer")
 
+	}
+
+	// Wait until the entire daemonset is deployed before checking for the version, then requeue
+	if nodesensor.Spec.Node.Advanced.AutoUpdateFromHostGroup {
+		if terminated := nodesensor.GetDeletionTimestamp(); terminated == nil {
+			aid, _ = r.getAID(ctx, nodesensor, logger)
+			if aid != "" {
+				config.UpdateAID(aid)
+				image, err = config.GetImageURI(ctx, logger)
+				if err != nil {
+					return ctrl.Result{}, err
+				}
+				log.Info("Image URI found during reconcile - auto update host group", "GetImageURI", image)
+				runningSensorVersion, err := r.getRunningSensorVersion(ctx, nodesensor, logger)
+				if err != nil {
+					logger.Error(err, "Failed to get running sensor version")
+				}
+				if runningSensorVersion != "" {
+					logger.Info("Get sensor version from daemonset", "versionFound", runningSensorVersion)
+					re := regexp.MustCompile(runningSensorVersion)
+					if match := re.FindStringSubmatch(image); len(match) > 0 {
+						logger.Info("Sensor version is up-to-date with sensor control policy", "versionFound", match[0])
+					} else {
+						logger.Info("Sensor version not up-to-date with sensor control policy. Requeueing for sensor version update...", "runningVersion", runningSensorVersion)
+						return ctrl.Result{Requeue: true}, nil
+					}
+				}
+			}
+		}
+	}
+
+	if shouldTrackSensorVersions(nodesensor) {
+		switch {
+		case nodesensor.Spec.Node.Advanced.UpdatePolicy != nil:
+			getSensorVersion := sensorversion.NewFalconCloudQuery(falcon.NodeSensor, nodesensor.Spec.FalconAPI.ApiConfig())
+			r.tracker.Track(req.NamespacedName, getSensorVersion, r.reconcileObjectWithName, nodesensor.Spec.Node.Advanced.IsAutoUpdatingForced())
+		case nodesensor.Spec.Node.Advanced.AutoUpdateFromHostGroup:
+			if config.AID() != "" {
+				getSensorVersion := sensorversion.NewFalconCloudByAidQuery(aid, nodesensor.Spec.FalconAPI.ApiConfig())
+				r.tracker.Track(req.NamespacedName, getSensorVersion, r.reconcileObjectWithName, nodesensor.Spec.Node.Advanced.IsAutoUpdatingForced())
+			}
+		}
+	} else {
+		r.tracker.StopTracking(req.NamespacedName)
 	}
 
 	return ctrl.Result{}, nil
