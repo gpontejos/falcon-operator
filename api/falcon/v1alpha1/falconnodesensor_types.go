@@ -176,23 +176,6 @@ type FalconNodeServiceAccount struct {
 	Annotations map[string]string `json:"annotations,omitempty"`
 }
 
-// FalconNodeSensorStatus defines the observed state of FalconNodeSensor
-// +k8s:openapi-gen=true
-type FalconNodeSensorStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
-	// Phase or the status of the deployment
-
-	// Version of the CrowdStrike Falcon Sensor
-	Sensor *string `json:"sensor,omitempty"`
-
-	// Version of the CrowdStrike Falcon Operator
-	Version string `json:"version,omitempty"`
-
-	// Conditions represent the latest available observations of an object's state
-	Conditions []metav1.Condition `json:"conditions,omitempty"`
-}
-
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 //+kubebuilder:resource:scope=Cluster
@@ -204,8 +187,8 @@ type FalconNodeSensorStatus struct {
 type FalconNodeSensor struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	Spec              FalconNodeSensorSpec   `json:"spec,omitempty"`
-	Status            FalconNodeSensorStatus `json:"status,omitempty"`
+	Spec              FalconNodeSensorSpec `json:"spec,omitempty"`
+	Status            FalconCRStatus       `json:"status,omitempty"`
 }
 
 //+kubebuilder:object:root=true

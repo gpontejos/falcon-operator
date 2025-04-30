@@ -201,6 +201,10 @@ func Daemonset(dsName, image, serviceAccount string, node *falconv1alpha1.Falcon
 	}
 
 	return &appsv1.DaemonSet{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: corev1.SchemeGroupVersion.String(),
+			Kind:       "DaemonSet",
+		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      dsName,
 			Namespace: node.Spec.InstallNamespace,
@@ -295,6 +299,10 @@ func RemoveNodeDirDaemonset(dsName, image, serviceAccount string, node *falconv1
 	runAsRoot := int64(0)
 
 	return &appsv1.DaemonSet{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: corev1.SchemeGroupVersion.String(),
+			Kind:       "DaemonSet",
+		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      dsName,
 			Namespace: node.Spec.InstallNamespace,

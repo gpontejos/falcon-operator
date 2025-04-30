@@ -34,6 +34,7 @@ const (
 )
 
 // FalconAdmissionStatus defines the observed state of FalconAdmission
+// +k8s:openapi-gen=true
 type FalconCRStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file

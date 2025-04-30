@@ -12,6 +12,7 @@ import (
 	"github.com/go-logr/logr"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	k8sErrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -28,7 +29,8 @@ import (
 
 var ErrNoWebhookServicePodReady = errors.New("no webhook service pod found in a Ready state")
 
-func Create(r client.Client, sch *runtime.Scheme, ctx context.Context, req ctrl.Request, log logr.Logger, falconObject client.Object, falconStatus *falconv1alpha1.FalconCRStatus, obj runtime.Object) error {
+// LAST CHANGE - working on refactor of Create. Return values of created and error
+func Create(r client.Client, sch *runtime.Scheme, ctx context.Context, req ctrl.Request, log logr.Logger, falconObject client.Object, falconStatus *falconv1alpha1.FalconCRStatus, obj runtime.Object) (bool, error) {
 	switch o := obj.(type) {
 	case client.Object:
 		name := o.GetName()
@@ -40,12 +42,12 @@ func Create(r client.Client, sch *runtime.Scheme, ctx context.Context, req ctrl.
 		err := ctrl.SetControllerReference(falconObject, o, sch)
 		if err != nil {
 			log.Error(err, fmt.Sprintf("unable to set controller reference for %s %s", fgvk.Kind, gvk.Kind))
-			return err
+			return false, err
 		}
 
 		log.Info(logMessage("Creating a new", fgvk.Kind, gvk.Kind), oLogMessage(gvk.Kind, "Name"), name, oLogMessage(gvk.Kind, "Namespace"), namespace)
 		err = r.Create(ctx, o)
-		if err != nil {
+		if !k8sErrors.IsAlreadyExists(err) {
 			log.Error(err, logMessage("Failed to create", fgvk.Kind, gvk.Kind), oLogMessage(gvk.Kind, "Name"), name, oLogMessage(gvk.Kind, "Namespace"), namespace)
 
 			if err := ConditionsUpdate(r, ctx, req, log, falconObject, falconStatus,
@@ -56,10 +58,13 @@ func Create(r client.Client, sch *runtime.Scheme, ctx context.Context, req ctrl.
 					Message:            fmt.Sprintf("%s %s creation has failed", fgvk.Kind, gvk.Kind),
 					ObservedGeneration: falconObject.GetGeneration(),
 				}); err != nil {
-				return err
+				return false, err
 			}
 
-			return err
+			return false, err
+		} else if err != nil {
+			log.Info(logMessage("%s %s already exists", fgvk.Kind, gvk.Kind), oLogMessage(gvk.Kind, "Name"), name, oLogMessage(gvk.Kind, "Namespace"), namespace)
+			return false, nil
 		}
 
 		if err := ConditionsUpdate(r, ctx, req, log, falconObject, falconStatus,
