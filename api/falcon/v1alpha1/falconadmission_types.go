@@ -10,10 +10,11 @@ import (
 )
 
 const (
-	DeployWatcherDefault     = true
-	SnapshotsEnabledDefault  = true
-	SnapshotsIntervalDefault = 22
-	WatcherEnabledDefault    = true
+	DeployWatcherDefault           = true
+	SnapshotsEnabledDefault        = true
+	SnapshotsIntervalDefault       = 22
+	WatcherEnabledDefault          = true
+	AdmissionControlEnabledDefault = true
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
@@ -132,6 +133,11 @@ type FalconAdmissionConfigSpec struct {
 	// +kubebuilder:default:=true
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Enable Resource Watcher",order=17
 	WatcherEnabled *bool `json:"watcherEnabled,omitempty"`
+
+	// Determines if Kubernetes resources are watched for cluster visibility.
+	// +kubebuilder:default:=true
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Enable Admission Control",order=18
+	AdmissionControlEnabled *bool `json:"admissionControlEnabled,omitempty"`
 
 	// Currently ignored and internally set to 1
 	// +kubebuilder:default:=2
@@ -270,4 +276,12 @@ func (watcher FalconAdmissionConfigSpec) GetWatcherEnabled() bool {
 	}
 
 	return *watcher.WatcherEnabled
+}
+
+func (ac FalconAdmissionConfigSpec) GetAdmissionControlEnabled() bool {
+	if ac.AdmissionControlEnabled == nil {
+		return WatcherEnabledDefault
+	}
+
+	return *ac.AdmissionControlEnabled
 }

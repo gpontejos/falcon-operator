@@ -10,6 +10,7 @@ metadata:
     crowdstrike.com/name: namespace
     crowdstrike.com/part-of: Falcon
     crowdstrike.com/provider: crowdstrike
+    webhook: enabled
   name: system
 ---
 apiVersion: apps/v1

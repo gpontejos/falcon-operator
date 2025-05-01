@@ -47,6 +47,7 @@ import (
 	falcondeployment "github.com/crowdstrike/falcon-operator/internal/controller/falcon_deployment"
 	imageanalyzercontroller "github.com/crowdstrike/falcon-operator/internal/controller/falcon_image_analyzer"
 	nodecontroller "github.com/crowdstrike/falcon-operator/internal/controller/falcon_node"
+	webhookfalconv1alpha1 "github.com/crowdstrike/falcon-operator/internal/webhook/falcon/v1alpha1"
 	"github.com/crowdstrike/falcon-operator/pkg/common"
 	"github.com/crowdstrike/falcon-operator/version"
 	// +kubebuilder:scaffold:imports
@@ -299,6 +300,13 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "FalconDeployment")
 		os.Exit(1)
 	}
+	// nolint:goconst
+	// if os.Getenv("ENABLE_WEBHOOKS") != "false" {
+	if err = webhookfalconv1alpha1.SetupFalconAdmissionWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "FalconAdmission")
+		os.Exit(1)
+	}
+	// }
 	// +kubebuilder:scaffold:builder
 
 	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {

@@ -11,15 +11,27 @@ metadata:
     crowdstrike.com/part-of: Falcon
     crowdstrike.com/provider: crowdstrike
     sensor.falcon-system.crowdstrike.com/injection: disabled
+    webhook: enabled
   name: falcon-operator
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
+    cert-manager.io/inject-ca-from: CERTIFICATE_NAMESPACE/CERTIFICATE_NAME
     controller-gen.kubebuilder.io/version: v0.16.5
   name: falconadmissions.falcon.crowdstrike.com
 spec:
+  conversion:
+    strategy: Webhook
+    webhook:
+      clientConfig:
+        service:
+          name: falcon-operator-falcon-admission-webhook-service
+          namespace: falcon-operator
+          path: /convert
+      conversionReviewVersions:
+      - v1
   group: falcon.crowdstrike.com
   names:
     kind: FalconAdmission
@@ -67,6 +79,11 @@ spec:
                 description: Additional configuration for Falcon Admission Controller
                   deployment.
                 properties:
+                  admissionControlEnabled:
+                    default: true
+                    description: Determines if Kubernetes resources are watched for
+                      cluster visibility.
+                    type: boolean
                   containerPort:
                     default: 4443
                     description: Port on which the Falcon Admission Controller container
@@ -2982,6 +2999,11 @@ spec:
                     description: Additional configuration for Falcon Admission Controller
                       deployment.
                     properties:
+                      admissionControlEnabled:
+                        default: true
+                        description: Determines if Kubernetes resources are watched
+                          for cluster visibility.
+                        type: boolean
                       containerPort:
                         default: 4443
                         description: Port on which the Falcon Admission Controller
@@ -8207,6 +8229,22 @@ subjects:
   name: falcon-operator-controller-manager
   namespace: falcon-operator
 ---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: falcon-operator
+  name: falcon-operator-falcon-admission-webhook-service
+  namespace: falcon-operator
+spec:
+  ports:
+  - port: 443
+    protocol: TCP
+    targetPort: 9443
+  selector:
+    control-plane: controller-manager
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -8258,7 +8296,8 @@ spec:
         - name: WATCH_NAMESPACE
         - name: OPERATOR_NAME
           value: falcon-operator
-        image: quay.io/crowdstrike/falcon-operator:1.4.0
+        image: controller:latest
+        imagePullPolicy: Never
         livenessProbe:
           httpGet:
             path: /healthz
@@ -8293,3 +8332,90 @@ spec:
           type: RuntimeDefault
       serviceAccountName: falcon-operator-controller-manager
       terminationGracePeriodSeconds: 10
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  labels:
+    crowdstrike.com/component: certificate
+    crowdstrike.com/created-by: falcon-operator
+    crowdstrike.com/instance: serving-cert
+    crowdstrike.com/managed-by: kustomize
+    crowdstrike.com/name: certificate
+    crowdstrike.com/part-of: Falcon
+    crowdstrike.com/provider: crowdstrike
+  name: falcon-operator-serving-cert
+  namespace: falcon-operator
+spec:
+  dnsNames:
+  - $(SERVICE_NAME).$(SERVICE_NAMESPACE).svc
+  - $(SERVICE_NAME).$(SERVICE_NAMESPACE).svc.cluster.local
+  issuerRef:
+    kind: Issuer
+    name: falcon-operator-selfsigned-issuer
+  secretName: webhook-server-cert
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  labels:
+    crowdstrike.com/component: certificate
+    crowdstrike.com/created-by: falcon-operator
+    crowdstrike.com/instance: selfsigned-issuer
+    crowdstrike.com/managed-by: kustomize
+    crowdstrike.com/name: issuer
+    crowdstrike.com/part-of: Falcon
+    crowdstrike.com/provider: crowdstrike
+  name: falcon-operator-selfsigned-issuer
+  namespace: falcon-operator
+spec:
+  selfSigned: {}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: falcon-operator
+  name: falcon-operator-allow-webhook-traffic
+  namespace: falcon-operator
+spec:
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          webhook: enabled
+    ports:
+    - port: 443
+      protocol: TCP
+  podSelector:
+    matchLabels:
+      control-plane: controller-manager
+  policyTypes:
+  - Ingress
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: falcon-operator-falcon-admission-validating-webhook-configuration
+webhooks:
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: falcon-operator-falcon-admission-webhook-service
+      namespace: falcon-operator
+      path: /validate-falcon-crowdstrike-com-v1alpha1-falconadmission
+  failurePolicy: Fail
+  name: vfalconadmission-v1alpha1.kb.io
+  rules:
+  - apiGroups:
+    - falcon.crowdstrike.com
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - falconadmissions
+  sideEffects: None
