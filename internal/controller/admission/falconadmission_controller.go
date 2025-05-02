@@ -482,6 +482,18 @@ func (r *FalconAdmissionReconciler) reconcileAdmissionDeployment(ctx context.Con
 		falconAdmission.Spec.AdmissionConfig.ContainerPort = &port
 	}
 
+	if !falconAdmission.Spec.AdmissionConfig.GetAdmissionControlEnabled() {
+		falconAdmission.Spec.AdmissionConfig.ResourcesClient = &corev1.ResourceRequirements{
+			Limits: corev1.ResourceList{
+				corev1.ResourceMemory: resource.MustParse("128Mi"),
+			},
+			Requests: corev1.ResourceList{
+				corev1.ResourceCPU:    resource.MustParse("100m"),
+				corev1.ResourceMemory: resource.MustParse("128Mi"),
+			},
+		}
+	}
+
 	existingDeployment := &appsv1.Deployment{}
 	dep := assets.AdmissionDeployment(falconAdmission.Name, falconAdmission.Spec.InstallNamespace, common.FalconAdmissionController, imageUri, falconAdmission, log)
 	updated := false
