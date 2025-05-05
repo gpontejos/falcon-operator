@@ -148,7 +148,7 @@ metadata:
     capabilities: Seamless Upgrades
     categories: Security,Monitoring
     containerImage: quay.io/crowdstrike/falcon-operator
-    createdAt: "2025-04-03T15:50:54Z"
+    createdAt: "2025-05-05T21:30:02Z"
     description: Falcon Operator installs CrowdStrike Falcon Sensors on the cluster
     features.operators.openshift.io/cnf: "false"
     features.operators.openshift.io/cni: "false"
@@ -161,7 +161,7 @@ metadata:
     features.operators.openshift.io/token-auth-azure: "false"
     features.operators.openshift.io/token-auth-gcp: "false"
     operatorframework.io/suggested-namespace: falcon-operator
-    operators.operatorframework.io/builder: operator-sdk-v1.38.0
+    operators.operatorframework.io/builder: operator-sdk-v1.39.2
     operators.operatorframework.io/project_layout: go.kubebuilder.io/v4
     repository: https://github.com/CrowdStrike/falcon-operator
     support: Community Only
@@ -242,9 +242,7 @@ spec:
       - description: |-
           FalconAPI configures connection from your local Falcon operator to CrowdStrike Falcon platform.
 
-
           When configured, it will pull the sensor from registry.crowdstrike.com and deploy the appropriate sensor to the cluster.
-
 
           If using the API is not desired, the sensor can be manually configured by setting the Image and Version fields.
         displayName: Falcon Platform API Configuration
@@ -701,9 +699,7 @@ spec:
       - description: |-
           FalconAPI configures connection from your local Falcon operator to CrowdStrike Falcon platform.
 
-
           When configured, it will pull the sensor from registry.crowdstrike.com and deploy the appropriate sensor to the cluster.
-
 
           If using the API is not desired, the sensor can be manually configured.
         displayName: Falcon Platform API Configuration
@@ -755,9 +751,7 @@ spec:
       - description: |-
           FalconAPI configures connection from your local Falcon operator to CrowdStrike Falcon platform.
 
-
           When configured, it will pull the sensor from registry.crowdstrike.com and deploy the appropriate sensor to the cluster.
-
 
           If using the API is not desired, the sensor can be manually configured by setting the Image and Version fields.
         displayName: Falcon Platform API Configuration
@@ -806,7 +800,6 @@ spec:
         path: falconContainerSensor.registry.tls.caCertificate
       - description: |-
           FalconAPI configures connection from your local Falcon operator to CrowdStrike Falcon platform.
-
 
           When configured, it will pull the sensor from registry.crowdstrike.com and deploy the appropriate sensor to the cluster.
         displayName: Falcon Platform API Configuration
@@ -862,9 +855,7 @@ spec:
       - description: |-
           FalconAPI configures connection from your local Falcon operator to CrowdStrike Falcon platform.
 
-
           When configured, it will pull the sensor from registry.crowdstrike.com and deploy the appropriate sensor to the cluster.
-
 
           If using the API is not desired, the sensor can be manually configured.
         displayName: Falcon Platform API Configuration
@@ -1387,7 +1378,6 @@ spec:
       - description: |-
           FalconAPI configures connection from your local Falcon operator to CrowdStrike Falcon platform.
 
-
           When configured, it will pull the sensor from registry.crowdstrike.com and deploy the appropriate sensor to the cluster.
         displayName: Falcon Platform API Configuration
         path: falcon_api
@@ -1493,9 +1483,7 @@ spec:
       - description: |-
           FalconAPI configures connection from your local Falcon operator to CrowdStrike Falcon platform.
 
-
           When configured, it will pull the sensor from registry.crowdstrike.com and deploy the appropriate sensor to the cluster.
-
 
           If using the API is not desired, the sensor can be manually configured.
         displayName: Falcon Platform API Configuration
@@ -1981,7 +1969,7 @@ spec:
                       fieldPath: metadata.annotations['olm.targetNamespaces']
                 - name: OPERATOR_NAME
                   value: falcon-operator
-                image: quay.io/crowdstrike/falcon-operator:1.4.0
+                image: quay.io/crowdstrike/falcon-operator:go1.23
                 livenessProbe:
                   httpGet:
                     path: /healthz

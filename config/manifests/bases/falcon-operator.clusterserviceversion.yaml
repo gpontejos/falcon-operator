@@ -98,9 +98,7 @@ spec:
       - description: |-
           FalconAPI configures connection from your local Falcon operator to CrowdStrike Falcon platform.
 
-
           When configured, it will pull the sensor from registry.crowdstrike.com and deploy the appropriate sensor to the cluster.
-
 
           If using the API is not desired, the sensor can be manually configured by setting the Image and Version fields.
         displayName: Falcon Platform API Configuration
@@ -557,9 +555,7 @@ spec:
       - description: |-
           FalconAPI configures connection from your local Falcon operator to CrowdStrike Falcon platform.
 
-
           When configured, it will pull the sensor from registry.crowdstrike.com and deploy the appropriate sensor to the cluster.
-
 
           If using the API is not desired, the sensor can be manually configured.
         displayName: Falcon Platform API Configuration
@@ -611,9 +607,7 @@ spec:
       - description: |-
           FalconAPI configures connection from your local Falcon operator to CrowdStrike Falcon platform.
 
-
           When configured, it will pull the sensor from registry.crowdstrike.com and deploy the appropriate sensor to the cluster.
-
 
           If using the API is not desired, the sensor can be manually configured by setting the Image and Version fields.
         displayName: Falcon Platform API Configuration
@@ -662,7 +656,6 @@ spec:
         path: falconContainerSensor.registry.tls.caCertificate
       - description: |-
           FalconAPI configures connection from your local Falcon operator to CrowdStrike Falcon platform.
-
 
           When configured, it will pull the sensor from registry.crowdstrike.com and deploy the appropriate sensor to the cluster.
         displayName: Falcon Platform API Configuration
@@ -718,9 +711,7 @@ spec:
       - description: |-
           FalconAPI configures connection from your local Falcon operator to CrowdStrike Falcon platform.
 
-
           When configured, it will pull the sensor from registry.crowdstrike.com and deploy the appropriate sensor to the cluster.
-
 
           If using the API is not desired, the sensor can be manually configured.
         displayName: Falcon Platform API Configuration
@@ -1243,7 +1234,6 @@ spec:
       - description: |-
           FalconAPI configures connection from your local Falcon operator to CrowdStrike Falcon platform.
 
-
           When configured, it will pull the sensor from registry.crowdstrike.com and deploy the appropriate sensor to the cluster.
         displayName: Falcon Platform API Configuration
         path: falcon_api
@@ -1349,9 +1339,7 @@ spec:
       - description: |-
           FalconAPI configures connection from your local Falcon operator to CrowdStrike Falcon platform.
 
-
           When configured, it will pull the sensor from registry.crowdstrike.com and deploy the appropriate sensor to the cluster.
-
 
           If using the API is not desired, the sensor can be manually configured.
         displayName: Falcon Platform API Configuration
