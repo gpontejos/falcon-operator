@@ -92,6 +92,7 @@ spec:
                     - us-2
                     - eu-1
                     - us-gov-1
+                    - us-gov-2
                     type: string
                 required:
                 - client_id
@@ -822,6 +823,7 @@ spec:
                         - us-2
                         - eu-1
                         - us-gov-1
+                        - us-gov-2
                         type: string
                     required:
                     - client_id
@@ -1000,6 +1002,7 @@ spec:
                         - us-2
                         - eu-1
                         - us-gov-1
+                        - us-gov-2
                         type: string
                     required:
                     - client_id
@@ -3247,6 +3250,7 @@ spec:
                         - us-2
                         - eu-1
                         - us-gov-1
+                        - us-gov-2
                         type: string
                     required:
                     - client_id
@@ -3608,6 +3612,7 @@ spec:
                         - us-2
                         - eu-1
                         - us-gov-1
+                        - us-gov-2
                         type: string
                     required:
                     - client_id
