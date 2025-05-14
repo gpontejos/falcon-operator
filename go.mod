@@ -9,7 +9,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/ecr v1.24.7
 	github.com/cert-manager/cert-manager v1.12.14
 	github.com/containers/image/v5 v5.31.1
-	github.com/crowdstrike/gofalcon v0.6.0
+	github.com/crowdstrike/gofalcon v0.14.0
 	github.com/go-logr/logr v1.4.2
 	github.com/go-openapi/swag v0.23.0
 	github.com/google/go-cmp v0.6.0
@@ -180,7 +180,7 @@ require (
 	go.uber.org/zap v1.27.0 // indirect
 	golang.org/x/crypto v0.31.0 // indirect
 	golang.org/x/net v0.33.0 // indirect
-	golang.org/x/oauth2 v0.21.0 // indirect
+	golang.org/x/oauth2 v0.26.0 // indirect
 	golang.org/x/sync v0.10.0 // indirect
 	golang.org/x/sys v0.28.0 // indirect
 	golang.org/x/term v0.27.0 // indirect
