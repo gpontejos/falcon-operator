@@ -290,6 +290,8 @@ func (r *FalconContainerReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		return ctrl.Result{}, fmt.Errorf("failed to reconcile injector ConfigMap: %v", err)
 	}
 
+	log.Info("ConfigMap spec", "configMap", fmt.Sprintf("%v", *configMap))
+
 	if _, err = r.reconcileDeployment(ctx, log, falconContainer); err != nil {
 		err = r.StatusUpdate(ctx, req, log, falconContainer, falconv1alpha1.ConditionFailed, metav1.ConditionFalse, "Reconciling", fmt.Sprintf("failed to reconcile injector Deployment: %v", err))
 		if err != nil {

@@ -31,6 +31,8 @@ func (r *FalconContainerReconciler) reconcileGenericConfigMap(name string, genFu
 	if err != nil {
 		return configMap, fmt.Errorf("unable to render expected configmap: %v", err)
 	}
+	log.Info("configmap created by newConfigMap", "configMap", fmt.Sprintf("%v", *configMap))
+
 	existingConfigMap := &corev1.ConfigMap{}
 	err = common.GetNamespacedObject(ctx, r.Client, r.Reader, types.NamespacedName{Name: name, Namespace: falconContainer.Spec.InstallNamespace}, existingConfigMap)
 	if err != nil {
@@ -62,6 +64,9 @@ func (r *FalconContainerReconciler) newCABundleConfigMap(ctx context.Context, lo
 
 func (r *FalconContainerReconciler) newConfigMap(ctx context.Context, log logr.Logger, falconContainer *falconv1alpha1.FalconContainer) (*corev1.ConfigMap, error) {
 	data := common.MakeSensorEnvMap(falconContainer.Spec.Falcon)
+
+	log.Info("map[string]string created by MakeSensorEnvMap", "MakeSensorEnvMap", fmt.Sprintf("%v", data))
+
 	data["CP_NAMESPACE"] = falconContainer.Spec.InstallNamespace
 	data["FALCON_INJECTOR_LISTEN_PORT"] = strconv.Itoa(int(*falconContainer.Spec.Injector.ListenPort))
 
@@ -116,6 +121,8 @@ func (r *FalconContainerReconciler) newConfigMap(ctx context.Context, log logr.L
 			data[strings.ToUpper(k)] = v
 		}
 	}
+
+	log.Info("newCABundleConfigMap complete", "newCABundleConfigMap", fmt.Sprintf("%v", data))
 
 	return assets.SensorConfigMap(injectorConfigMapName, falconContainer.Spec.InstallNamespace, common.FalconSidecarSensor, data), nil
 }
