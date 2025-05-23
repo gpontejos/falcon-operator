@@ -17,7 +17,7 @@ import (
 // FalconAPI configures connection from your local Falcon operator to CrowdStrike Falcon platform.
 type FalconAPI struct {
 	// Cloud Region defines CrowdStrike Falcon Cloud Region to which the operator will connect and register.
-	// +kubebuilder:validation:Enum=autodiscover;us-1;us-2;eu-1;gov-1;gov-2
+	// +kubebuilder:validation:Enum=autodiscover;us-1;us-2;eu-1;us-gov-1;us-gov-2
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="CrowdStrike Falcon Cloud Region",order=3
 	CloudRegion string `json:"cloud_region"`
 
@@ -87,8 +87,15 @@ type RegistrySpec struct {
 
 // ApiConfig generates standard gofalcon library api config
 func (fa *FalconAPI) ApiConfig() *falcon.ApiConfig {
+	region := ""
+	if fa.CloudRegion == "us-gov-2" {
+		region = "gov2"
+	} else {
+		region = fa.CloudRegion
+	}
+
 	return &falcon.ApiConfig{
-		Cloud:             falcon.Cloud(fa.CloudRegion),
+		Cloud:             falcon.Cloud(region),
 		ClientId:          fa.ClientId,
 		ClientSecret:      fa.ClientSecret,
 		HostOverride:      fa.HostOverride,
