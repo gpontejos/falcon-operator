@@ -39,7 +39,7 @@ The FalconDeployment Spec contains fields that are shared by all child component
 | :---- | :---- |
 | falcon\_api.client\_id | Required. CrowdStrike API Client ID |
 | falcon\_api.client\_secret | Required. CrowdStrike API Client Secret |
-| falcon\_api.cloud\_region | CrowdStrike cloud region (allowed values: autodiscover, us-1, us-2, eu-1, us-gov-1, us-gov-2) |
+| falcon\_api.cloud\_region | CrowdStrike cloud region (allowed values: autodiscover, us-1, us-2, eu-1, gov-1, gov-2) |
 | falcon\_api.cid | (Optional) CrowdStrike Falcon CID API override |
 | registry.type | (Optional) Type of container registry to be used. Options: acr, ecr, gcr, crowdstrike, openshift |
 | registry.acr\_name | (Optional) (Azure only) Name of the Azure Container Registry for Falcon Container push |

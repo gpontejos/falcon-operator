@@ -49,7 +49,7 @@ spec:
 | :------------------------- | :------------------------------------------------------------------------------------------------------- |
 | falcon_api.client_id       | CrowdStrike API Client ID                                                                                |
 | falcon_api.client_secret   | CrowdStrike API Client Secret                                                                            |
-| falcon_api.cloud_region    | CrowdStrike cloud region (allowed values: autodiscover, us-1, us-2, eu-1, us-gov-1, us-gov-2)            |
+| falcon_api.cloud_region    | CrowdStrike cloud region (allowed values: autodiscover, us-1, us-2, eu-1, gov-1, gov-2)               |
 | falcon_api.cid             | (optional) CrowdStrike Falcon CID API override                                                           |
 
 #### Sidecar Injection Configuration Settings
