@@ -6720,6 +6720,10 @@ spec:
                         default: false
                         description: Enable debugging for the Falcon Image Analyzer.
                         type: boolean
+                      enableAPIGateway:
+                        default: false
+                        description: Enable only if need to use the api.crowdstrike.com
+                        type: boolean
                       exclusions:
                         description: Exclusions for the Falcon Image Analyzer.
                         properties:
@@ -6855,6 +6859,11 @@ spec:
                               More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
                             type: object
                         type: object
+                      scanStats:
+                        default: true
+                        description: Set this flag to true to send scan error stats
+                          to cs cloud.
+                        type: boolean
                       serviceAccount:
                         description: Define annotations that will be passed down to
                           Image Analyzer service account. This is useful for passing
@@ -7811,6 +7820,10 @@ spec:
                     default: false
                     description: Enable debugging for the Falcon Image Analyzer.
                     type: boolean
+                  enableAPIGateway:
+                    default: false
+                    description: Enable only if need to use the api.crowdstrike.com
+                    type: boolean
                   exclusions:
                     description: Exclusions for the Falcon Image Analyzer.
                     properties:
@@ -7946,6 +7959,11 @@ spec:
                           More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
                         type: object
                     type: object
+                  scanStats:
+                    default: true
+                    description: Set this flag to true to send scan error stats to
+                      cs cloud.
+                    type: boolean
                   serviceAccount:
                     description: Define annotations that will be passed down to Image
                       Analyzer service account. This is useful for passing along AWS
@@ -9394,7 +9412,8 @@ spec:
         - name: WATCH_NAMESPACE
         - name: OPERATOR_NAME
           value: falcon-operator
-        image: quay.io/crowdstrike/falcon-operator:1.5.0
+        image: controller:latest
+        imagePullPolicy: Never
         livenessProbe:
           httpGet:
             path: /healthz

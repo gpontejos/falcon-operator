@@ -63,6 +63,8 @@ spec:
 | imageAnalyzerConfig.registryConfig.credentials | (optional) Use this to provide registry secrets in the form of a list of maps. e.g.<pre>- namespace: ns1<br>&nbsp;&nbsp;secretName: mysecretname</pre>To scan OpenShift control plane components, specify the cluster's pull secret: <pre>- namespace: openshift-config<br>&nbsp;&nbsp;secretName: pull-secret</pre>  |
 | imageAnalyzerConfig.resources                 | (optional) Configure the resources of the Falcon Image Analyzer                                                                                                                                                  |
 | imageAnalyzerConfig.updateStrategy            | (optional) Configure the deployment update strategy of the Falcon Image Analyzer                                                                                                                                  |
+| imageAnalyzerConfig.scanStats                 | (optional) Set this flag to true to send scan error stats to cs cloud. These events can be searched in investigate>events / advanced events search. note that if true, agent will send an error for image for first time only. Repeated errors for same images will not be sent to preserve network footprint |                                                                                                                                 |
+| imageAnalyzerConfig.enableAPIGateway          | (optional) Enable only if need to use the api.crowdstrike.com                                                                                                                                |
 
 #### Falcon Secret Settings
 | Spec                    | Description                                                                                    |

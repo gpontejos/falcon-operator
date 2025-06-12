@@ -111,6 +111,16 @@ type FalconImageAnalyzerConfigSpec struct {
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Falcon Image Analyzer Enable Debugging",order=13
 	// +kubebuilder:default:=false
 	EnableDebug bool `json:"debug,omitempty"`
+
+	// Set this flag to true to send scan error stats to cs cloud.
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Falcon Image Analyzer Scan Stats",order=14
+	// +kubebuilder:default:=true
+	ScanStats bool `json:"scanStats,omitempty"`
+
+	// Enable only if need to use the api.crowdstrike.com
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Falcon Image Analyzer Enable API Gateway",order=15
+	// +kubebuilder:default:=false
+	EnableAPIGateway bool `json:"enableAPIGateway,omitempty"`
 }
 
 type FalconImageAnalyzerPriorityClass struct {

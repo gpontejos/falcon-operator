@@ -104,6 +104,8 @@ func (r *FalconImageAnalyzerReconciler) newConfigMap(ctx context.Context, name s
 	}
 
 	data["AGENT_DEBUG"] = strconv.FormatBool(falconImageAnalyzer.Spec.ImageAnalyzerConfig.EnableDebug)
+	data["USE_CS_API_GATEWAY"] = strconv.FormatBool(falconImageAnalyzer.Spec.ImageAnalyzerConfig.EnableAPIGateway)
+	data["SEND_SCAN_STATS"] = strconv.FormatBool(falconImageAnalyzer.Spec.ImageAnalyzerConfig.ScanStats)
 
 	data["IS_KUBERNETES"] = isKubernetes
 	data["AGENT_CID"] = cid
