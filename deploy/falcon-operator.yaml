@@ -6711,6 +6711,11 @@ spec:
                     description: Additional configuration for Falcon Image Analyzer
                       deployment.
                     properties:
+                      agentMaxConsumerThreads:
+                        default: "1"
+                        description: AgentMaxConsumerThreads for the Falcon Image
+                          Analyzer.
+                        type: string
                       azureConfigPath:
                         type: string
                       clusterName:
@@ -6719,6 +6724,10 @@ spec:
                       debug:
                         default: false
                         description: Enable debugging for the Falcon Image Analyzer.
+                        type: boolean
+                      enableKlogs:
+                        default: false
+                        description: EnableKlogs for the Falcon Image Analyzer.
                         type: boolean
                       exclusions:
                         description: Exclusions for the Falcon Image Analyzer.
@@ -6765,6 +6774,10 @@ spec:
                           type: object
                           x-kubernetes-map-type: atomic
                         type: array
+                      logOutput:
+                        default: "2"
+                        description: LogOutput for the Falcon Image Analyzer.
+                        type: string
                       mountPath:
                         default: /tmp
                         description: Set the falcon image analyzer volume mount path.
@@ -6855,6 +6868,10 @@ spec:
                               More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
                             type: object
                         type: object
+                      sendScanStats:
+                        default: false
+                        description: SendScanStats for the Falcon Image Analyzer.
+                        type: boolean
                       serviceAccount:
                         description: Define annotations that will be passed down to
                           Image Analyzer service account. This is useful for passing
@@ -6919,6 +6936,10 @@ spec:
                                 x-kubernetes-int-or-string: true
                             type: object
                         type: object
+                      watcherListPageSize:
+                        default: "500"
+                        description: WatcherListPageSize for the Falcon Image Analyzer.
+                        type: string
                     type: object
                   installNamespace:
                     default: falcon-iar
@@ -7802,6 +7823,10 @@ spec:
                 default: {}
                 description: Additional configuration for Falcon Image Analyzer deployment.
                 properties:
+                  agentMaxConsumerThreads:
+                    default: "1"
+                    description: AgentMaxConsumerThreads for the Falcon Image Analyzer.
+                    type: string
                   azureConfigPath:
                     type: string
                   clusterName:
@@ -7810,6 +7835,10 @@ spec:
                   debug:
                     default: false
                     description: Enable debugging for the Falcon Image Analyzer.
+                    type: boolean
+                  enableKlogs:
+                    default: false
+                    description: EnableKlogs for the Falcon Image Analyzer.
                     type: boolean
                   exclusions:
                     description: Exclusions for the Falcon Image Analyzer.
@@ -7856,6 +7885,10 @@ spec:
                       type: object
                       x-kubernetes-map-type: atomic
                     type: array
+                  logOutput:
+                    default: "2"
+                    description: LogOutput for the Falcon Image Analyzer.
+                    type: string
                   mountPath:
                     default: /tmp
                     description: Set the falcon image analyzer volume mount path.
@@ -7946,6 +7979,10 @@ spec:
                           More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
                         type: object
                     type: object
+                  sendScanStats:
+                    default: false
+                    description: SendScanStats for the Falcon Image Analyzer.
+                    type: boolean
                   serviceAccount:
                     description: Define annotations that will be passed down to Image
                       Analyzer service account. This is useful for passing along AWS
@@ -8010,6 +8047,10 @@ spec:
                             x-kubernetes-int-or-string: true
                         type: object
                     type: object
+                  watcherListPageSize:
+                    default: "500"
+                    description: WatcherListPageSize for the Falcon Image Analyzer.
+                    type: string
                 type: object
               installNamespace:
                 default: falcon-iar
@@ -9394,7 +9435,8 @@ spec:
         - name: WATCH_NAMESPACE
         - name: OPERATOR_NAME
           value: falcon-operator
-        image: quay.io/crowdstrike/falcon-operator:1.5.0
+        image: controller:latest
+        imagePullPolicy: Never
         livenessProbe:
           httpGet:
             path: /healthz

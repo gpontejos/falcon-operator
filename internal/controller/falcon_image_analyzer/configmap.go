@@ -20,9 +20,8 @@ import (
 )
 
 const (
-	isKubernetes            = "true"
-	agentRunmode            = "watcher"
-	agentMaxConsumerThreads = "1"
+	isKubernetes = "true"
+	agentRunmode = "watcher"
 )
 
 func (r *FalconImageAnalyzerReconciler) reconcileConfigMap(ctx context.Context, req ctrl.Request, log logr.Logger, falconImageAnalyzer *falconv1alpha1.FalconImageAnalyzer) (bool, error) {
@@ -60,6 +59,18 @@ func (r *FalconImageAnalyzerReconciler) reconcileGenericConfigMap(name string, g
 	return false, nil
 
 }
+
+/*
+WATCHER_LIST_PAGESIZE
+SEND_SCAN_STATS
+LOG_OUTPUT
+ENABLE_KLOGS
+AGENT_RUNMODE - makeE - make configurable
+AGENT_RUNTIME
+AGENT_RUNTIME_SOCKET
+AGENT_MAX_CONSUMER_THREADS - make configu configurable
+AGENT_TEMP_MOUNT_SIZrable
+*/
 
 func (r *FalconImageAnalyzerReconciler) newConfigMap(ctx context.Context, name string, falconImageAnalyzer *falconv1alpha1.FalconImageAnalyzer) (*corev1.ConfigMap, error) {
 	var err error
@@ -104,15 +115,16 @@ func (r *FalconImageAnalyzerReconciler) newConfigMap(ctx context.Context, name s
 	}
 
 	data["AGENT_DEBUG"] = strconv.FormatBool(falconImageAnalyzer.Spec.ImageAnalyzerConfig.EnableDebug)
+	data["WATCHER_LIST_PAGESIZE"] = falconImageAnalyzer.Spec.ImageAnalyzerConfig.WatcherListPageSize
+	data["SEND_SCAN_STATS"] = strconv.FormatBool(falconImageAnalyzer.Spec.ImageAnalyzerConfig.SendScanStats)
+	data["LOG_OUTPUT"] = falconImageAnalyzer.Spec.ImageAnalyzerConfig.LogOutput
+	data["ENABLE_KLOGS"] = strconv.FormatBool(falconImageAnalyzer.Spec.ImageAnalyzerConfig.EnableKlogs)
+	data["AGENT_MAX_CONSUMER_THREADS"] = falconImageAnalyzer.Spec.ImageAnalyzerConfig.AgentMaxConsumerThreads
+	data["AGENT_TEMP_MOUNT_SIZE"] = falconImageAnalyzer.Spec.ImageAnalyzerConfig.VolumeSizeLimit
 
 	data["IS_KUBERNETES"] = isKubernetes
 	data["AGENT_CID"] = cid
 	data["AGENT_RUNMODE"] = agentRunmode
-	data["AGENT_MAX_CONSUMER_THREADS"] = agentMaxConsumerThreads
-	data["AGENT_TEMP_MOUNT_SIZE"] = "20Gi"
-	if falconImageAnalyzer.Spec.ImageAnalyzerConfig.VolumeSizeLimit != "" {
-		data["AGENT_TEMP_MOUNT_SIZE"] = falconImageAnalyzer.Spec.ImageAnalyzerConfig.VolumeSizeLimit
-	}
 
 	return assets.SensorConfigMap(name, falconImageAnalyzer.Spec.InstallNamespace, common.FalconImageAnalyzer, data), nil
 }

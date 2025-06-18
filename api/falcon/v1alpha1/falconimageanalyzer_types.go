@@ -111,6 +111,48 @@ type FalconImageAnalyzerConfigSpec struct {
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Falcon Image Analyzer Enable Debugging",order=13
 	// +kubebuilder:default:=false
 	EnableDebug bool `json:"debug,omitempty"`
+
+	// WatcherListPageSize for the Falcon Image Analyzer.
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Falcon Image Analyzer Watcher List Page Size",order=14
+	// +kubebuilder:default:="500"
+	WatcherListPageSize string `json:"watcherListPageSize,omitempty"`
+
+	// SendScanStats for the Falcon Image Analyzer.
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Falcon Image Analyzer Send Scan Stats",order=15
+	// +kubebuilder:default:=false
+	SendScanStats bool `json:"sendScanStats,omitempty"`
+
+	// LogOutput for the Falcon Image Analyzer.
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Falcon Image Analyzer Log Output",order=16
+	// +kubebuilder:default:="2"
+	LogOutput string `json:"logOutput,omitempty"`
+
+	// EnableKlogs for the Falcon Image Analyzer.
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Falcon Image Analyzer Enable KLogs",order=17
+	// +kubebuilder:default:=false
+	EnableKlogs bool `json:"enableKlogs,omitempty"`
+
+	// AgentMaxConsumerThreads for the Falcon Image Analyzer.
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Falcon Image Analyzer Agent Max Consumer Threads",order=18
+	// +kubebuilder:default:="1"
+	AgentMaxConsumerThreads string `json:"agentMaxConsumerThreads,omitempty"`
+
+	// Daemonset for the Falcon Image Analyzer.
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Falcon Image Analyzer Daemonset",order=18
+	// +kubebuilder:default:=false
+	Daemonset bool `json:"daemonset,omitempty"`
+
+	// Specifies tolerations for custom taints. Defaults to allowing scheduling on all nodes.
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,order=19
+	Tolerations *[]corev1.Toleration `json:"tolerations"`
+
+	// ContainerSecurityContext for the Falcon Image Analyzer.
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,order=20
+	ContainerSecurityContext *corev1.SecurityContext `json:"containerSecurityContext,omitempty"`
+
+	// PodSecurityContext for the Falcon Image Analyzer.
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,order=21
+	PodSecurityContext *corev1.PodSecurityContext `json:"podSecurityContext,omitempty"`
 }
 
 type FalconImageAnalyzerPriorityClass struct {
@@ -198,4 +240,11 @@ type FalconImageAnalyzerList struct {
 
 func init() {
 	SchemeBuilder.Register(&FalconImageAnalyzer{}, &FalconImageAnalyzerList{})
+}
+
+func (iar FalconImageAnalyzer) GetTolerations() *[]corev1.Toleration {
+	if iar.Spec.ImageAnalyzerConfig.Tolerations == nil {
+		return &[]corev1.Toleration{}
+	}
+	return iar.Spec.ImageAnalyzerConfig.Tolerations
 }

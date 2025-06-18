@@ -396,3 +396,104 @@ func RemoveNodeDirDaemonset(dsName, image, serviceAccount string, node *falconv1
 		},
 	}
 }
+
+func IARDaemonset(dsName, image, serviceAccount string, iar *falconv1alpha1.FalconImageAnalyzer) *appsv1.DaemonSet {
+	hostnetwork := true                            // Add to spec
+	dnsPolicy := corev1.DNSClusterFirstWithHostNet // Add to spec
+	dsType := "daemonset"
+	// fsGroup := int64(nobodyGroup)
+	return &appsv1.DaemonSet{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      dsName,
+			Namespace: iar.Spec.InstallNamespace,
+			Labels:    common.CRLabels(dsType, dsName, common.FalconImageAnalyzer),
+		},
+		Spec: appsv1.DaemonSetSpec{
+			Selector: &metav1.LabelSelector{
+				MatchLabels: common.CRLabels(dsType, dsName, common.FalconImageAnalyzer),
+			},
+			Template: corev1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: common.CRLabels(dsType, dsName, common.FalconImageAnalyzer),
+					Annotations: map[string]string{
+						common.FalconContainerInjection: "disabled",
+					},
+				},
+				Spec: corev1.PodSpec{
+					// NodeSelector is set to linux until windows containers are supported for the Falcon sensor
+					NodeSelector: common.NodeSelector,
+					Affinity: &corev1.Affinity{
+						NodeAffinity: &corev1.NodeAffinity{
+							RequiredDuringSchedulingIgnoredDuringExecution: &corev1.NodeSelector{
+								NodeSelectorTerms: []corev1.NodeSelectorTerm{
+									{
+										MatchExpressions: []corev1.NodeSelectorRequirement{
+											{
+												Key:      "kubernetes.io/os",
+												Operator: corev1.NodeSelectorOpIn,
+												Values:   []string{"linux"},
+											},
+											{
+												Key:      "kubernetes.io/arch",
+												Operator: corev1.NodeSelectorOpIn,
+												Values:   []string{"amd64", "arm64"},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+					Tolerations:        *iar.GetTolerations(),
+					HostNetwork:        hostnetwork,
+					DNSPolicy:          dnsPolicy,
+					ImagePullSecrets:   pullSecrets(node), // update this
+					SecurityContext:    iar.Spec.ImageAnalyzerConfig.PodSecurityContext,
+					InitContainers:     iarInitContainer(iar),
+					ServiceAccountName: serviceAccount,
+					Containers: []corev1.Container{
+						{
+							SecurityContext: iar.Spec.ImageAnalyzerConfig.ContainerSecurityContext,
+							Name:            "falcon-image-analyzer",
+							Image:           image,
+							ImagePullPolicy: iar.Spec.ImageAnalyzerConfig.ImagePullPolicy,
+							EnvFrom: []corev1.EnvFromSource{
+								{
+									ConfigMapRef: &corev1.ConfigMapEnvSource{
+										LocalObjectReference: corev1.LocalObjectReference{
+											Name: dsName + "-config",
+										},
+									},
+								},
+							},
+							VolumeMounts: []corev1.VolumeMount{
+								{
+									Name:      "falconstore",
+									MountPath: common.FalconStoreFile,
+								},
+							},
+							Resources: dsResources(node),
+						},
+					},
+					Volumes:           volumes(),
+					PriorityClassName: iar.Spec.ImageAnalyzerConfig.PriorityClass.Name,
+				},
+			},
+		},
+	}
+}
+
+func iarInitContainer(iar *falconv1alpha1.FalconImageAnalyzer) []corev1.Container {
+	return []corev1.Container{
+		{
+			Name:    fmt.Sprintf("%s-init-container", iar.Name),
+			Image:   "gcr.io/google.com/cloudsdktool/google-cloud-cli:alpine",
+			Command: common.FalconShellCommand,
+			Args: []string{
+				"-c",
+				fmt.Sprintf("curl -sS -H 'Metadata-Flavor: Google' 'http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token' --retry 30 --retry-connrefused --retry-max-time 60 --connect-timeout 3 --fail --retry-all-errors > /dev/null && exit 0 || echo 'Retry limit exceeded. Failed to wait for metadata server to be available. Check if the gke-metadata-server Pod in the kube-system namespace is healthy.' >&2; exit 1"),
+			},
+			SecurityContext: iar.Spec.ImageAnalyzerConfig.ContainerSecurityContext,
+		},
+	}
+}
