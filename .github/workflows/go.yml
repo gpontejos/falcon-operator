@@ -100,8 +100,6 @@ jobs:
         uses: golangci/golangci-lint-action@v8
         with:
           args: "--out-${NO_FUTURE}format colored-line-number --timeout=5m12s"
-          skip-pkg-cache: true
-          skip-build-cache: true
 
   gosec:
     strategy:
