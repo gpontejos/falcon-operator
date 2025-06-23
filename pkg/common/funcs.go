@@ -62,7 +62,7 @@ func GetKubernetesVersion() *version.Info {
 		panic(err.Error())
 	}
 
-	version, err := clientset.DiscoveryClient.ServerVersion()
+	version, err := clientset.ServerVersion()
 	if err != nil {
 		panic(err.Error())
 	}

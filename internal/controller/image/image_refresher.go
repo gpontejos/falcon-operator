@@ -47,7 +47,7 @@ func (r *ImageRefresher) Refresh(imageDestination string, sensorType falcon.Sens
 	policy := &signature.Policy{Default: []signature.PolicyRequirement{signature.NewPRInsecureAcceptAnything()}}
 	policyContext, err := signature.NewPolicyContext(policy)
 	if err != nil {
-		return "", fmt.Errorf("Error loading trust policy: %v", err)
+		return "", fmt.Errorf("error loading trust policy: %v", err)
 	}
 	defer func() { _ = policyContext.Destroy() }()
 
@@ -61,7 +61,7 @@ func (r *ImageRefresher) Refresh(imageDestination string, sensorType falcon.Sens
 	destRef, err := alltransports.ParseImageName(dest)
 
 	if err != nil {
-		return "", fmt.Errorf("Invalid destination name %s: %v", dest, err)
+		return "", fmt.Errorf("invalid destination name %s: %v", dest, err)
 	}
 
 	r.log.Info("Identified the target location for image push", "reference", destRef.DockerReference().String())
@@ -80,7 +80,7 @@ func (r *ImageRefresher) Refresh(imageDestination string, sensorType falcon.Sens
 	dest = fmt.Sprintf("docker://%s", imageDestination)
 	destRef, err = alltransports.ParseImageName(dest)
 	if err != nil {
-		return "", fmt.Errorf("Invalid destination name %s: %v", dest, err)
+		return "", fmt.Errorf("invalid destination name %s: %v", dest, err)
 	}
 
 	r.log.Info("Identified the target location for image push", "reference", destRef.DockerReference().String())
@@ -126,7 +126,7 @@ func wrapWithHint(in error) error {
 	}
 
 	if strings.Contains(in.Error(), "authentication required") {
-		return fmt.Errorf("Could not authenticate to the registry: %w", in)
+		return fmt.Errorf("could not authenticate to the registry: %w", in)
 	}
 	return in
 }

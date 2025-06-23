@@ -39,7 +39,7 @@ func Dockerfile(registry, username, password string) ([]byte, error) {
 func marshal(cfg dockerConfigFile) ([]byte, error) {
 	file, err := json.MarshalIndent(cfg, "", "\t")
 	if err != nil {
-		return nil, fmt.Errorf("Error marshaling JSON: %s", err)
+		return nil, fmt.Errorf("error marshaling JSON: %s", err)
 	}
 	return file, err
 }

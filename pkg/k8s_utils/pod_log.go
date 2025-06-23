@@ -17,19 +17,23 @@ func GetPodLog(ctx context.Context, config *rest.Config, pod *corev1.Pod, contai
 	}
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		return "", fmt.Errorf("Cannot build kubernetes go client: %w", err)
+		return "", fmt.Errorf("cannot build kubernetes go client: %w", err)
 	}
 	req := clientset.CoreV1().Pods(pod.Namespace).GetLogs(pod.Name, &podLogOpts)
 	podLogs, err := req.Stream(ctx)
 	if err != nil {
-		return "", fmt.Errorf("Error in opening pod log stream: %w", err)
+		return "", fmt.Errorf("error in opening pod log stream: %w", err)
 	}
-	defer podLogs.Close()
+	defer func() {
+		if err := podLogs.Close(); err != nil {
+			fmt.Printf("Error closing pod logs: %v", err)
+		}
+	}()
 
 	buf := new(bytes.Buffer)
 	_, err = io.Copy(buf, podLogs)
 	if err != nil {
-		return "", fmt.Errorf("Error in copy information from podLogs to buffer: %w", err)
+		return "", fmt.Errorf("error in copy information from podLogs to buffer: %w", err)
 	}
 	str := buf.String()
 

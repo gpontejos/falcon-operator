@@ -11,7 +11,7 @@ import (
 
 	falconv1alpha1 "github.com/crowdstrike/falcon-operator/api/falcon/v1alpha1"
 	"github.com/crowdstrike/falcon-operator/internal/controller/image"
-	"github.com/crowdstrike/falcon-operator/internal/errors"
+	internalErrors "github.com/crowdstrike/falcon-operator/internal/errors"
 	"github.com/crowdstrike/falcon-operator/pkg/aws"
 	"github.com/crowdstrike/falcon-operator/pkg/common"
 	"github.com/crowdstrike/falcon-operator/pkg/gcp"
@@ -52,7 +52,7 @@ func (r *FalconImageAnalyzerReconciler) PushImage(ctx context.Context, log logr.
 
 	tag, err := image.Refresh(registryUri, falcon.ImageSensor, version)
 	if err != nil {
-		return fmt.Errorf("Cannot push Falcon Image Analyzer Image: %v", err)
+		return fmt.Errorf("cannot push Falcon Image Analyzer Image: %v", err)
 	}
 
 	log.Info("Falcon Image Analyzer Controller Image pushed successfully", "Image.Tag", tag)
@@ -60,7 +60,7 @@ func (r *FalconImageAnalyzerReconciler) PushImage(ctx context.Context, log logr.
 
 	imageUri, err := r.imageUri(ctx, falconImageAnalyzer)
 	if err != nil {
-		return fmt.Errorf("Cannot identify Falcon Image Analyzer Image: %v", err)
+		return fmt.Errorf("cannot identify Falcon Image Analyzer Image: %v", err)
 	}
 
 	meta.SetStatusCondition(&falconImageAnalyzer.Status.Conditions, metav1.Condition{
@@ -75,12 +75,12 @@ func (r *FalconImageAnalyzerReconciler) PushImage(ctx context.Context, log logr.
 
 func (r *FalconImageAnalyzerReconciler) verifyCrowdStrike(ctx context.Context, log logr.Logger, falconImageAnalyzer *falconv1alpha1.FalconImageAnalyzer) (bool, error) {
 	if _, err := r.setImageTag(ctx, falconImageAnalyzer); err != nil {
-		return false, fmt.Errorf("Cannot set Falcon Registry Tag: %s", err)
+		return false, fmt.Errorf("cannot set Falcon Registry Tag: %s", err)
 	}
 
 	imageUri, err := r.imageUri(ctx, falconImageAnalyzer)
 	if err != nil {
-		return false, fmt.Errorf("Cannot find Falcon Registry URI: %s", err)
+		return false, fmt.Errorf("cannot find Falcon Registry URI: %s", err)
 	}
 
 	condition := meta.IsStatusConditionPresentAndEqual(falconImageAnalyzer.Status.Conditions, falconv1alpha1.ConditionImageReady, metav1.ConditionTrue)
@@ -110,27 +110,27 @@ func (r *FalconImageAnalyzerReconciler) registryUri(ctx context.Context, falconI
 		}
 
 		if imageStream.Status.DockerImageRepository == "" {
-			return "", fmt.Errorf("Unable to find route to OpenShift on-cluster registry. Please verify that OpenShift on-cluster registry is up and running.")
+			return "", fmt.Errorf("unable to find route to OpenShift on-cluster registry. Please verify that OpenShift on-cluster registry is up and running")
 		}
 
 		return imageStream.Status.DockerImageRepository, nil
 	case falconv1alpha1.RegistryTypeGCR:
 		projectId, err := gcp.GetProjectID()
 		if err != nil {
-			return "", fmt.Errorf("Cannot get GCP Project ID: %v", err)
+			return "", fmt.Errorf("cannot get GCP Project ID: %v", err)
 		}
 
 		return "gcr.io/" + projectId + "/falcon-imageanalyzer", nil
 	case falconv1alpha1.RegistryTypeECR:
 		repo, err := aws.UpsertECRRepo(ctx, "falcon-image-analyzer")
 		if err != nil {
-			return "", fmt.Errorf("Cannot get target docker URI for ECR repository: %v", err)
+			return "", fmt.Errorf("cannot get target docker URI for ECR repository: %v", err)
 		}
 
 		return *repo.RepositoryUri, nil
 	case falconv1alpha1.RegistryTypeACR:
 		if falconImageAnalyzer.Spec.Registry.AcrName == nil {
-			return "", fmt.Errorf("Cannot push Falcon Image locally to ACR. acr_name was not specified")
+			return "", fmt.Errorf("cannot push Falcon Image locally to ACR. acr_name was not specified")
 		}
 
 		return fmt.Sprintf("%s.azurecr.io/falcon-imageanalyzer", *falconImageAnalyzer.Spec.Registry.AcrName), nil
@@ -142,7 +142,7 @@ func (r *FalconImageAnalyzerReconciler) registryUri(ctx context.Context, falconI
 
 		return falcon.FalconContainerSensorImageURI(cloud, falcon.ImageSensor), nil
 	default:
-		return "", fmt.Errorf("Unrecognized registry type: %s", falconImageAnalyzer.Spec.Registry.Type)
+		return "", fmt.Errorf("unrecognized registry type: %s", falconImageAnalyzer.Spec.Registry.Type)
 	}
 }
 
@@ -174,7 +174,7 @@ func (r *FalconImageAnalyzerReconciler) getImageTag(falconImageAnalyzer *falconv
 		return *falconImageAnalyzer.Status.Sensor, nil
 	}
 
-	return "", fmt.Errorf("Unable to get falcon image analyzer container image version")
+	return "", fmt.Errorf("unable to get falcon image analyzer container image version")
 }
 
 func (r *FalconImageAnalyzerReconciler) setImageTag(ctx context.Context, falconImageAnalyzer *falconv1alpha1.FalconImageAnalyzer) (string, error) {

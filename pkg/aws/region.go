@@ -1,9 +1,16 @@
 package aws
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 )
+
+func closeAndCheckError(c io.Closer, err *error) {
+	if cerr := c.Close(); cerr != nil && *err == nil {
+		*err = fmt.Errorf("error closing: %v", cerr)
+	}
+}
 
 func AvailabilityZone() (string, error) {
 	// curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone
@@ -15,8 +22,7 @@ func AvailabilityZone() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer resp.Body.Close()
-
+	defer closeAndCheckError(resp.Body, &err)
 	body, err := io.ReadAll(resp.Body)
 	return string(body), err
 }
@@ -31,8 +37,7 @@ func Region() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer resp.Body.Close()
-
+	defer closeAndCheckError(resp.Body, &err)
 	body, err := io.ReadAll(resp.Body)
 	return string(body), err
 }

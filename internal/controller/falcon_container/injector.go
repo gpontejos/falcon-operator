@@ -54,7 +54,7 @@ func (r *FalconContainerReconciler) reconcileInjectorTLSSecret(ctx context.Conte
 			}
 			injectorTLSSecret := assets.Secret(injectorTLSSecretName, falconContainer.Spec.InstallNamespace, common.FalconSidecarSensor, secretData, corev1.SecretTypeTLS)
 			if err = ctrl.SetControllerReference(falconContainer, injectorTLSSecret, r.Scheme); err != nil {
-				return &corev1.Secret{}, fmt.Errorf("unable to set controller reference on injector TLS Secret%s: %v", injectorTLSSecret.ObjectMeta.Name, err)
+				return &corev1.Secret{}, fmt.Errorf("unable to set controller reference on injector TLS Secret%s: %v", injectorTLSSecret.Name, err)
 			}
 			return injectorTLSSecret, r.Create(ctx, log, falconContainer, injectorTLSSecret)
 		}
@@ -85,7 +85,7 @@ func (r *FalconContainerReconciler) reconcileDeployment(ctx context.Context, log
 	if err != nil {
 		if errors.IsNotFound(err) {
 			if err = ctrl.SetControllerReference(falconContainer, deployment, r.Scheme); err != nil {
-				return &appsv1.Deployment{}, fmt.Errorf("unable to set controller reference on injector Deployment %s: %v", deployment.ObjectMeta.Name, err)
+				return &appsv1.Deployment{}, fmt.Errorf("unable to set controller reference on injector Deployment %s: %v", deployment.Name, err)
 			}
 			return deployment, r.Create(ctx, log, falconContainer, deployment)
 		}

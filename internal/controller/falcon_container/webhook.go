@@ -33,7 +33,7 @@ func (r *FalconContainerReconciler) reconcileWebhook(ctx context.Context, log lo
 	if err != nil {
 		if errors.IsNotFound(err) {
 			if err = ctrl.SetControllerReference(falconContainer, webhook, r.Scheme); err != nil {
-				return &arv1.MutatingWebhookConfiguration{}, fmt.Errorf("unable to set controller reference on mutating webhook configuration %s: %v", webhook.ObjectMeta.Name, err)
+				return &arv1.MutatingWebhookConfiguration{}, fmt.Errorf("unable to set controller reference on mutating webhook configuration %s: %v", webhook.Name, err)
 			}
 
 			return webhook, r.Create(ctx, log, falconContainer, webhook)

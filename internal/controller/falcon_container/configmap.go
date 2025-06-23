@@ -36,7 +36,7 @@ func (r *FalconContainerReconciler) reconcileGenericConfigMap(name string, genFu
 	if err != nil {
 		if errors.IsNotFound(err) {
 			if err = ctrl.SetControllerReference(falconContainer, configMap, r.Scheme); err != nil {
-				return &corev1.ConfigMap{}, fmt.Errorf("unable to set controller reference on config map %s: %v", configMap.ObjectMeta.Name, err)
+				return &corev1.ConfigMap{}, fmt.Errorf("unable to set controller reference on config map %s: %v", configMap.Name, err)
 			}
 			return configMap, r.Create(ctx, log, falconContainer, configMap)
 		}

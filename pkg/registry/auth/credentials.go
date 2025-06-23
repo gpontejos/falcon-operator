@@ -49,7 +49,7 @@ func GetPushCredentials(secrets []corev1.Secret) Credentials {
 			continue
 		}
 
-		if (secret.ObjectMeta.Annotations == nil || secret.ObjectMeta.Annotations["kubernetes.io/service-account.name"] != "builder") && secret.Name != "builder" {
+		if (secret.Annotations == nil || secret.Annotations["kubernetes.io/service-account.name"] != "builder") && secret.Name != "builder" {
 			continue
 		}
 
@@ -129,7 +129,7 @@ func (g *gcr) Pulltoken() ([]byte, error) {
 	password := string(g.Key)
 	newData, err := Dockerfile("gcr.io", username, password)
 	if err != nil {
-		return nil, fmt.Errorf("Could not create pull token for GCR: %s", err)
+		return nil, fmt.Errorf("could not create pull token for GCR: %s", err)
 	}
 	return newData, nil
 }
@@ -166,7 +166,7 @@ func (e *ecr) DestinationContext() (*types.SystemContext, error) {
 
 func ECRCredentials(token string) (Credentials, error) {
 	if token[0:4] != "AWS:" {
-		return nil, fmt.Errorf("Could not parse EKS crendentials token. Expected to start with 'AWS:', got: '%s'", token[0:4])
+		return nil, fmt.Errorf("could not parse EKS crendentials token. Expected to start with 'AWS:', got: '%s'", token[0:4])
 	}
 	return &ecr{
 		password: token[4:],

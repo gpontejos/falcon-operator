@@ -31,7 +31,7 @@ func GetCredentials(ctx context.Context, registryType falconv1alpha1.RegistryTyp
 
 		creds := auth.GetPushCredentials(secrets.Items)
 		if creds == nil {
-			return nil, fmt.Errorf("Cannot find suitable secret to push falcon-image to your registry")
+			return nil, fmt.Errorf("cannot find suitable secret to push falcon-image to your registry")
 		}
 		return creds, nil
 	}

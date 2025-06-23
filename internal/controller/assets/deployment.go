@@ -42,7 +42,7 @@ func SideCarDeployment(name string, namespace string, component string, imageUri
 	runNonRoot := true
 	initRunAsNonRoot := false
 	initContainers := []corev1.Container{}
-	var registryCAConfigMapName string = ""
+	var registryCAConfigMapName = ""
 	labels := common.CRLabels("deployment", name, component)
 
 	if falconContainer.Spec.Injector.Resources != nil {

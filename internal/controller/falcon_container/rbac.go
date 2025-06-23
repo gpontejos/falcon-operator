@@ -31,18 +31,18 @@ func (r *FalconContainerReconciler) reconcileServiceAccount(ctx context.Context,
 		if errors.IsNotFound(err) {
 			if err = ctrl.SetControllerReference(falconContainer, serviceAccount, r.Scheme); err != nil {
 				// Set the service account controller reference, but only if we create it; not on updates to an existing sa
-				return &corev1.ServiceAccount{}, fmt.Errorf("unable to set controller reference on service account %s: %v", serviceAccount.ObjectMeta.Name, err)
+				return &corev1.ServiceAccount{}, fmt.Errorf("unable to set controller reference on service account %s: %v", serviceAccount.Name, err)
 			}
 			return serviceAccount, r.Create(ctx, log, falconContainer, serviceAccount)
 		}
 		return &corev1.ServiceAccount{}, fmt.Errorf("unable to query existing service account %s: %v", common.SidecarServiceAccountName, err)
 	}
-	if !reflect.DeepEqual(serviceAccount.ObjectMeta.Annotations, existingServiceAccount.ObjectMeta.Annotations) {
-		existingServiceAccount.ObjectMeta.Annotations = serviceAccount.ObjectMeta.Annotations
+	if !reflect.DeepEqual(serviceAccount.Annotations, existingServiceAccount.Annotations) {
+		existingServiceAccount.Annotations = serviceAccount.Annotations
 		update = true
 	}
-	if !reflect.DeepEqual(serviceAccount.ObjectMeta.Labels, existingServiceAccount.ObjectMeta.Labels) {
-		existingServiceAccount.ObjectMeta.Labels = serviceAccount.ObjectMeta.Labels
+	if !reflect.DeepEqual(serviceAccount.Labels, existingServiceAccount.Labels) {
+		existingServiceAccount.Labels = serviceAccount.Labels
 		update = true
 	}
 	if update {
@@ -60,7 +60,7 @@ func (r *FalconContainerReconciler) reconcileClusterRoleBinding(ctx context.Cont
 	if err != nil {
 		if errors.IsNotFound(err) {
 			if err = ctrl.SetControllerReference(falconContainer, clusterRoleBinding, r.Scheme); err != nil {
-				return &rbacv1.ClusterRoleBinding{}, fmt.Errorf("unable to set controller reference on cluster role binding %s: %v", clusterRoleBinding.ObjectMeta.Name, err)
+				return &rbacv1.ClusterRoleBinding{}, fmt.Errorf("unable to set controller reference on cluster role binding %s: %v", clusterRoleBinding.Name, err)
 			}
 			return clusterRoleBinding, r.Create(ctx, log, falconContainer, clusterRoleBinding)
 		}
@@ -69,7 +69,7 @@ func (r *FalconContainerReconciler) reconcileClusterRoleBinding(ctx context.Cont
 	// If the RoleRef changes, we need to re-create it
 	if !reflect.DeepEqual(clusterRoleBinding.RoleRef, existingClusterRoleBinding.RoleRef) {
 		if err = ctrl.SetControllerReference(falconContainer, clusterRoleBinding, r.Scheme); err != nil {
-			return &rbacv1.ClusterRoleBinding{}, fmt.Errorf("unable to set controller reference on cluster role binding %s: %v", clusterRoleBinding.ObjectMeta.Name, err)
+			return &rbacv1.ClusterRoleBinding{}, fmt.Errorf("unable to set controller reference on cluster role binding %s: %v", clusterRoleBinding.Name, err)
 		}
 		if err = r.Delete(ctx, log, falconContainer, existingClusterRoleBinding); err != nil {
 			return &rbacv1.ClusterRoleBinding{}, fmt.Errorf("unable to delete existing cluster role binding %s: %v", injectorClusterRoleBindingName, err)

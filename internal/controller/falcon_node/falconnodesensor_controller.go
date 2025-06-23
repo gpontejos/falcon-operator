@@ -622,7 +622,7 @@ func (r *FalconNodeSensorReconciler) handleCrowdStrikeSecrets(ctx context.Contex
 	if err != nil {
 		logger.Error(err, "Unable to assign Controller Reference to the Pull Secret")
 	}
-	err = r.Client.Create(ctx, &secret)
+	err = r.Create(ctx, &secret)
 	if err != nil {
 		if !errors.IsAlreadyExists(err) {
 			logger.Error(err, "Failed to create new Pull Secret", "Secret.Namespace", nodesensor.Spec.InstallNamespace, "Secret.Name", common.FalconPullSecretName)
