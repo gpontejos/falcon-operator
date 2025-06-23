@@ -15,7 +15,7 @@ type Config struct {
 
 func NewConfig() (*Config, error) {
 	if os.Getenv("AWS_REGION") == "" {
-		return nil, fmt.Errorf("Environment variable AWS_REGION is not set for the operator. This is indicator of misconfiguration. Please ensure kubernetes service account bound to the operator is configured by eksctl create iamserviceaccount as described in the documentation.")
+		return nil, fmt.Errorf("environment variable AWS_REGION is not set for the operator. This is indicator of misconfiguration. Please ensure kubernetes service account bound to the operator is configured by eksctl create iamserviceaccount as described in the documentation")
 	}
 
 	cfg, err := config.LoadDefaultConfig(context.TODO())

@@ -53,12 +53,12 @@ func (r *FalconAdmissionReconciler) reconcileServiceAccount(ctx context.Context,
 		return err
 	}
 
-	if !reflect.DeepEqual(serviceAccount.ObjectMeta.Annotations, existingServiceAccount.ObjectMeta.Annotations) {
-		existingServiceAccount.ObjectMeta.Annotations = serviceAccount.ObjectMeta.Annotations
+	if !reflect.DeepEqual(serviceAccount.Annotations, existingServiceAccount.Annotations) {
+		existingServiceAccount.Annotations = serviceAccount.Annotations
 		update = true
 	}
-	if !reflect.DeepEqual(serviceAccount.ObjectMeta.Labels, existingServiceAccount.ObjectMeta.Labels) {
-		existingServiceAccount.ObjectMeta.Labels = serviceAccount.ObjectMeta.Labels
+	if !reflect.DeepEqual(serviceAccount.Labels, existingServiceAccount.Labels) {
+		existingServiceAccount.Labels = serviceAccount.Labels
 		update = true
 	}
 

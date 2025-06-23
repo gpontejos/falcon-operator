@@ -12,7 +12,7 @@ import (
 	falconv1alpha1 "github.com/crowdstrike/falcon-operator/api/falcon/v1alpha1"
 	"github.com/crowdstrike/falcon-operator/internal/controller/common/sensor"
 	"github.com/crowdstrike/falcon-operator/internal/controller/image"
-	"github.com/crowdstrike/falcon-operator/internal/errors"
+	internalErrors "github.com/crowdstrike/falcon-operator/internal/errors"
 	"github.com/crowdstrike/falcon-operator/pkg/aws"
 	"github.com/crowdstrike/falcon-operator/pkg/common"
 	"github.com/crowdstrike/falcon-operator/pkg/gcp"
@@ -53,7 +53,7 @@ func (r *FalconContainerReconciler) PushImage(ctx context.Context, log logr.Logg
 
 	tag, err := image.Refresh(registryUri, falcon.SidecarSensor, version)
 	if err != nil {
-		return fmt.Errorf("Cannot push Falcon Container Image: %v", err)
+		return fmt.Errorf("cannot push Falcon Container Image: %v", err)
 	}
 
 	log.Info("Falcon Container Image pushed successfully", "Image.Tag", tag)
@@ -61,7 +61,7 @@ func (r *FalconContainerReconciler) PushImage(ctx context.Context, log logr.Logg
 
 	imageUri, err := r.imageUri(ctx, falconContainer)
 	if err != nil {
-		return fmt.Errorf("Cannot identify Falcon Container Image: %v", err)
+		return fmt.Errorf("cannot identify Falcon Container Image: %v", err)
 	}
 
 	err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
@@ -80,13 +80,13 @@ func (r *FalconContainerReconciler) PushImage(ctx context.Context, log logr.Logg
 
 func (r *FalconContainerReconciler) verifyCrowdStrikeRegistry(ctx context.Context, log logr.Logger, falconContainer *falconv1alpha1.FalconContainer) (bool, error) {
 	if _, err := r.setImageTag(ctx, falconContainer); err != nil {
-		return false, fmt.Errorf("Cannot set Falcon Registry Tag: %s", err)
+		return false, fmt.Errorf("cannot set Falcon Registry Tag: %s", err)
 	}
 	log.Info("Skipping push of Falcon Container image to local registry. Remote CrowdStrike registry will be used.")
 
 	imageUri, err := r.imageUri(ctx, falconContainer)
 	if err != nil {
-		return false, fmt.Errorf("Cannot find Falcon Registry URI: %s", err)
+		return false, fmt.Errorf("cannot find Falcon Registry URI: %s", err)
 	}
 
 	condition := meta.IsStatusConditionPresentAndEqual(falconContainer.Status.Conditions, falconv1alpha1.ConditionImageReady, metav1.ConditionTrue)
@@ -119,27 +119,27 @@ func (r *FalconContainerReconciler) registryUri(ctx context.Context, falconConta
 		}
 
 		if imageStream.Status.DockerImageRepository == "" {
-			return "", fmt.Errorf("Unable to find route to OpenShift on-cluster registry. Please verify that OpenShift on-cluster registry is up and running.")
+			return "", fmt.Errorf("unable to find route to OpenShift on-cluster registry. Please verify that OpenShift on-cluster registry is up and running")
 		}
 
 		return imageStream.Status.DockerImageRepository, nil
 	case falconv1alpha1.RegistryTypeGCR:
 		projectId, err := gcp.GetProjectID()
 		if err != nil {
-			return "", fmt.Errorf("Cannot get GCP Project ID: %v", err)
+			return "", fmt.Errorf("cannot get GCP Project ID: %v", err)
 		}
 
 		return "gcr.io/" + projectId + "/falcon-container", nil
 	case falconv1alpha1.RegistryTypeECR:
 		repo, err := aws.UpsertECRRepo(ctx, "falcon-container")
 		if err != nil {
-			return "", fmt.Errorf("Cannot get target docker URI for ECR repository: %v", err)
+			return "", fmt.Errorf("cannot get target docker URI for ECR repository: %v", err)
 		}
 
 		return *repo.RepositoryUri, nil
 	case falconv1alpha1.RegistryTypeACR:
 		if falconContainer.Spec.Registry.AcrName == nil {
-			return "", fmt.Errorf("Cannot push Falcon Image locally to ACR. acr_name was not specified")
+			return "", fmt.Errorf("cannot push Falcon Image locally to ACR. acr_name was not specified")
 		}
 
 		return fmt.Sprintf("%s.azurecr.io/falcon-container", *falconContainer.Spec.Registry.AcrName), nil
@@ -151,7 +151,7 @@ func (r *FalconContainerReconciler) registryUri(ctx context.Context, falconConta
 
 		return falcon.FalconContainerSensorImageURI(cloud, falcon.SidecarSensor), nil
 	default:
-		return "", fmt.Errorf("Unrecognized registry type: %s", falconContainer.Spec.Registry.Type)
+		return "", fmt.Errorf("unrecognized registry type: %s", falconContainer.Spec.Registry.Type)
 	}
 }
 
@@ -183,7 +183,7 @@ func (r *FalconContainerReconciler) getImageTag(falconContainer *falconv1alpha1.
 		return *falconContainer.Status.Sensor, nil
 	}
 
-	return "", fmt.Errorf("Unable to get falcon container version")
+	return "", fmt.Errorf("unable to get falcon container version")
 }
 
 func (r *FalconContainerReconciler) setImageTag(ctx context.Context, falconContainer *falconv1alpha1.FalconContainer) (string, error) {

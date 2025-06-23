@@ -11,7 +11,7 @@ import (
 	"github.com/containers/image/v5/docker/reference"
 	"github.com/containers/image/v5/types"
 
-	"github.com/crowdstrike/falcon-operator/internal/errors"
+	internalErrors "github.com/crowdstrike/falcon-operator/internal/errors"
 	"github.com/crowdstrike/falcon-operator/pkg/falcon_api"
 	"github.com/crowdstrike/falcon-operator/pkg/registry/auth"
 	"github.com/crowdstrike/gofalcon/falcon"
@@ -32,15 +32,15 @@ func NewFalconRegistry(ctx context.Context, apiCfg *falcon.ApiConfig) (*FalconRe
 	apiCfg.Context = ctx
 	client, err := falcon.NewClient(apiCfg)
 	if err != nil {
-		return nil, fmt.Errorf("Could not authenticate with CrowdStrike API: %v", err)
+		return nil, fmt.Errorf("could not authenticate with CrowdStrike API: %v", err)
 	}
 
 	token, err := falcon_api.RegistryToken(ctx, client)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to fetch registry token for CrowdStrike container registry:, %v", err)
+		return nil, fmt.Errorf("failed to fetch registry token for CrowdStrike container registry:, %v", err)
 	}
 	if token == "" {
-		return nil, errors.New("Empty registry token received from CrowdStrike API")
+		return nil, errors.New("empty registry token received from CrowdStrike API")
 	}
 
 	ccid, err := falcon_api.CCID(ctx, client)
@@ -48,7 +48,7 @@ func NewFalconRegistry(ctx context.Context, apiCfg *falcon.ApiConfig) (*FalconRe
 		return nil, err
 	}
 	if ccid == "" {
-		return nil, errors.New("Empty CCID received from CrowdStrike API")
+		return nil, errors.New("empty CCID received from CrowdStrike API")
 	}
 
 	return &FalconRegistry{
@@ -127,7 +127,7 @@ func guessLastTag(tags []string, filter func(string) bool) (string, error) {
 		}
 	}
 	if len(filteredTags) == 0 {
-		return "", fmt.Errorf("Could not find suitable image tag in the CrowdStrike registry. Tags were: %+v", tags)
+		return "", fmt.Errorf("could not find suitable image tag in the CrowdStrike registry. Tags were: %+v", tags)
 	}
 
 	return filteredTags[len(filteredTags)-1], nil
@@ -136,7 +136,7 @@ func guessLastTag(tags []string, filter func(string) bool) (string, error) {
 func listDockerTags(ctx context.Context, sys *types.SystemContext, imgRef types.ImageReference) ([]string, error) {
 	tags, err := docker.GetRepositoryTags(ctx, sys, imgRef)
 	if err != nil {
-		return nil, fmt.Errorf("Error listing repository (%s) tags: %v", imgRef.StringWithinTransport(), err)
+		return nil, fmt.Errorf("error listing repository (%s) tags: %v", imgRef.StringWithinTransport(), err)
 	}
 	return tags, nil
 }
@@ -158,7 +158,7 @@ func (fr *FalconRegistry) systemContext() (*types.SystemContext, error) {
 func (fr *FalconRegistry) username() (string, error) {
 	s := strings.Split(fr.falconCID, "-")
 	if len(s) != 2 {
-		return "", fmt.Errorf("Cannot parse FalconCID. Expected exactly one '-' character in the '%s'", fr.falconCID)
+		return "", fmt.Errorf("cannot parse FalconCID. Expected exactly one '-' character in the '%s'", fr.falconCID)
 	}
 	lowerCID := strings.ToLower(s[0])
 	return fmt.Sprintf("fc-%s", lowerCID), nil

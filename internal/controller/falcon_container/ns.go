@@ -37,7 +37,7 @@ func (r *FalconContainerReconciler) reconcileNamespace(ctx context.Context, log 
 	if err != nil {
 		if errors.IsNotFound(err) {
 			if err = ctrl.SetControllerReference(falconContainer, namespace, r.Scheme); err != nil {
-				return &corev1.Namespace{}, fmt.Errorf("unable to set controller reference on namespace %s: %v", namespace.ObjectMeta.Name, err)
+				return &corev1.Namespace{}, fmt.Errorf("unable to set controller reference on namespace %s: %v", namespace.Name, err)
 			}
 			return namespace, r.Create(ctx, log, falconContainer, namespace)
 		}

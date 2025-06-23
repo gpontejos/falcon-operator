@@ -24,6 +24,6 @@ import (
 // Run e2e tests using the Ginkgo runner.
 func TestE2E(t *testing.T) {
 	RegisterFailHandler(Fail)
-	fmt.Fprintf(GinkgoWriter, "Starting Falcon Operator suite\n")
+	fmt.Fprintf(GinkgoWriter, "Starting Falcon Operator suite\n") //nolint:errcheck
 	RunSpecs(t, "Falcon e2e suite")
 }

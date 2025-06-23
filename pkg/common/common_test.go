@@ -88,7 +88,9 @@ func TestMakeSensorEnvMap(t *testing.T) {
 	falconSensor.Tags = []string{"test"}
 	falconSensor.Trace = "debug"
 
-	os.Setenv("HTTPS_PROXY", "https://test-automatic.proxy:666")
+	if err := os.Setenv("HTTPS_PROXY", "https://test-automatic.proxy:666"); err != nil {
+		t.Errorf("failed setting HTTPS_PROXY - error: %v", err)
+	}
 	proxy := NewProxyInfo()
 
 	// Test getting proxy from environment

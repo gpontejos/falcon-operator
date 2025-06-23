@@ -78,7 +78,7 @@ func (r *FalconContainerReconciler) reconcileRegistrySecret(namespace string, pu
 	if err != nil {
 		if errors.IsNotFound(err) {
 			if err := ctrl.SetControllerReference(falconContainer, secret, r.Scheme); err != nil {
-				return &corev1.Secret{}, fmt.Errorf("failed to set controller reference on registry pull token secret %s: %v", secret.ObjectMeta.Name, err)
+				return &corev1.Secret{}, fmt.Errorf("failed to set controller reference on registry pull token secret %s: %v", secret.Name, err)
 			}
 
 			return secret, r.Create(ctx, log, falconContainer, secret)

@@ -44,7 +44,7 @@ func (r *FalconContainerReconciler) Create(ctx context.Context, log logr.Logger,
 
 		return err
 	default:
-		return fmt.Errorf("Unrecognized kube object type: %T", obj)
+		return fmt.Errorf("unrecognized kube object type: %T", obj)
 	}
 }
 
@@ -60,7 +60,7 @@ func (r *FalconContainerReconciler) Update(ctx context.Context, log logr.Logger,
 			if errors.IsNotFound(err) {
 				log.Info(fmt.Sprintf("Falcon Container object %s %s does not exist in namespace %s", gvk.Kind, name, namespace))
 			}
-			return fmt.Errorf("Cannot update object %s %s in namespace %s: %v", gvk.Kind, name, namespace, err)
+			return fmt.Errorf("cannot update object %s %s in namespace %s: %v", gvk.Kind, name, namespace, err)
 		}
 
 		err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
@@ -76,7 +76,7 @@ func (r *FalconContainerReconciler) Update(ctx context.Context, log logr.Logger,
 
 		return err
 	default:
-		return fmt.Errorf("Unrecognized kube object type: %T", obj)
+		return fmt.Errorf("unrecognized kube object type: %T", obj)
 	}
 }
 
@@ -92,7 +92,7 @@ func (r *FalconContainerReconciler) Delete(ctx context.Context, log logr.Logger,
 			if errors.IsNotFound(err) {
 				log.Info(fmt.Sprintf("Falcon Container object %s %s already removed from namespace %s", gvk.Kind, name, namespace))
 			}
-			return fmt.Errorf("Cannot delete object %s %s in namespace %s: %v", gvk.Kind, name, namespace, err)
+			return fmt.Errorf("cannot delete object %s %s in namespace %s: %v", gvk.Kind, name, namespace, err)
 		}
 
 		err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
@@ -108,6 +108,6 @@ func (r *FalconContainerReconciler) Delete(ctx context.Context, log logr.Logger,
 
 		return err
 	default:
-		return fmt.Errorf("Unrecognized kube object type: %T", obj)
+		return fmt.Errorf("unrecognized kube object type: %T", obj)
 	}
 }

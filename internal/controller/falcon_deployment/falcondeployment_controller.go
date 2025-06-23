@@ -153,7 +153,7 @@ func (r *FalconDeploymentReconciler) reconcileAdmissionController(ctx context.Co
 	existingFalconAdmission := &falconv1alpha1.FalconAdmission{}
 	updated := false
 
-	if err := r.Client.List(ctx, &admissionList); err != nil {
+	if err := r.List(ctx, &admissionList); err != nil {
 		return fmt.Errorf("unable to get FalconAdmissionList: %s", err)
 	}
 
@@ -189,7 +189,7 @@ func (r *FalconDeploymentReconciler) reconcileAdmissionController(ctx context.Co
 			return r.create(ctx, log, falconDeployment, newFalconAdmission)
 		}
 
-		err := r.Client.Get(ctx, types.NamespacedName{Name: existingFalconAdmission.Name, Namespace: existingFalconAdmission.Namespace}, existingFalconAdmission)
+		err := r.Get(ctx, types.NamespacedName{Name: existingFalconAdmission.Name, Namespace: existingFalconAdmission.Namespace}, existingFalconAdmission)
 
 		if err != nil {
 			log.Error(err, "Failed to get FalconAdmission resource")
@@ -207,7 +207,7 @@ func (r *FalconDeploymentReconciler) reconcileAdmissionController(ctx context.Co
 			}
 		}
 	} else if len(admissionList.Items) != 0 {
-		err := r.Client.Get(ctx, types.NamespacedName{Name: existingFalconAdmission.Name, Namespace: existingFalconAdmission.Namespace}, existingFalconAdmission)
+		err := r.Get(ctx, types.NamespacedName{Name: existingFalconAdmission.Name, Namespace: existingFalconAdmission.Namespace}, existingFalconAdmission)
 		if err != nil {
 			log.Error(err, "Failed to get FalconAdmission resource")
 			return err
@@ -223,7 +223,7 @@ func (r *FalconDeploymentReconciler) reconcileNodeSensor(ctx context.Context, lo
 	existingNodeSensor := &falconv1alpha1.FalconNodeSensor{}
 	updated := false
 
-	if err := r.Client.List(ctx, &nodeSensorList); err != nil {
+	if err := r.List(ctx, &nodeSensorList); err != nil {
 		return fmt.Errorf("unable to get FalconNodeSensorList: %s", err)
 	}
 
@@ -253,7 +253,7 @@ func (r *FalconDeploymentReconciler) reconcileNodeSensor(ctx context.Context, lo
 			return r.create(ctx, log, falconDeployment, newNodeSensor)
 		}
 
-		err := r.Client.Get(ctx, types.NamespacedName{Name: existingNodeSensor.Name, Namespace: existingNodeSensor.Namespace}, existingNodeSensor)
+		err := r.Get(ctx, types.NamespacedName{Name: existingNodeSensor.Name, Namespace: existingNodeSensor.Namespace}, existingNodeSensor)
 
 		if err != nil {
 			log.Error(err, "Failed to get FalconNodeSensor resource")
@@ -271,7 +271,7 @@ func (r *FalconDeploymentReconciler) reconcileNodeSensor(ctx context.Context, lo
 			}
 		}
 	} else if len(nodeSensorList.Items) != 0 {
-		err := r.Client.Get(ctx, types.NamespacedName{Name: existingNodeSensor.Name, Namespace: existingNodeSensor.Namespace}, existingNodeSensor)
+		err := r.Get(ctx, types.NamespacedName{Name: existingNodeSensor.Name, Namespace: existingNodeSensor.Namespace}, existingNodeSensor)
 		if err != nil {
 			log.Error(err, "Failed to get FalconNodeSensor resource")
 			return err
@@ -287,7 +287,7 @@ func (r *FalconDeploymentReconciler) reconcileImageAnalyzer(ctx context.Context,
 	existingImageAnalyzer := &falconv1alpha1.FalconImageAnalyzer{}
 	updated := false
 
-	if err := r.Client.List(ctx, &imageAnalyzerList); err != nil {
+	if err := r.List(ctx, &imageAnalyzerList); err != nil {
 		return fmt.Errorf("unable to get FalconImageAnalyzerList: %s", err)
 	}
 
@@ -317,7 +317,7 @@ func (r *FalconDeploymentReconciler) reconcileImageAnalyzer(ctx context.Context,
 			return r.create(ctx, log, falconDeployment, newImageAnalyzer)
 		}
 
-		err := r.Client.Get(ctx, types.NamespacedName{Name: existingImageAnalyzer.Name, Namespace: existingImageAnalyzer.Namespace}, existingImageAnalyzer)
+		err := r.Get(ctx, types.NamespacedName{Name: existingImageAnalyzer.Name, Namespace: existingImageAnalyzer.Namespace}, existingImageAnalyzer)
 
 		if err != nil {
 			log.Error(err, "Failed to get FalconImageAnalyzer resource")
@@ -335,7 +335,7 @@ func (r *FalconDeploymentReconciler) reconcileImageAnalyzer(ctx context.Context,
 			}
 		}
 	} else if len(imageAnalyzerList.Items) != 0 {
-		err := r.Client.Get(ctx, types.NamespacedName{Name: existingImageAnalyzer.Name, Namespace: existingImageAnalyzer.Namespace}, existingImageAnalyzer)
+		err := r.Get(ctx, types.NamespacedName{Name: existingImageAnalyzer.Name, Namespace: existingImageAnalyzer.Namespace}, existingImageAnalyzer)
 		if err != nil {
 			log.Error(err, "Failed to get FalconImageAnalyzer resource")
 			return err
@@ -351,7 +351,7 @@ func (r *FalconDeploymentReconciler) reconcileContainerSensor(ctx context.Contex
 	existingContainerSensor := &falconv1alpha1.FalconContainer{}
 	updated := false
 
-	if err := r.Client.List(ctx, &containerSensorList); err != nil {
+	if err := r.List(ctx, &containerSensorList); err != nil {
 		return fmt.Errorf("unable to get FalconContainerList: %s", err)
 	}
 
@@ -382,7 +382,7 @@ func (r *FalconDeploymentReconciler) reconcileContainerSensor(ctx context.Contex
 			return r.create(ctx, log, falconDeployment, newContainerSensor)
 		}
 
-		err := r.Client.Get(ctx, types.NamespacedName{Name: existingContainerSensor.Name, Namespace: existingContainerSensor.Namespace}, existingContainerSensor)
+		err := r.Get(ctx, types.NamespacedName{Name: existingContainerSensor.Name, Namespace: existingContainerSensor.Namespace}, existingContainerSensor)
 
 		if err != nil {
 			log.Error(err, "Failed to get FalconContainerSensor resource")
@@ -400,7 +400,7 @@ func (r *FalconDeploymentReconciler) reconcileContainerSensor(ctx context.Contex
 			}
 		}
 	} else if len(containerSensorList.Items) != 0 {
-		err := r.Client.Get(ctx, types.NamespacedName{Name: existingContainerSensor.Name, Namespace: existingContainerSensor.Namespace}, existingContainerSensor)
+		err := r.Get(ctx, types.NamespacedName{Name: existingContainerSensor.Name, Namespace: existingContainerSensor.Namespace}, existingContainerSensor)
 		if err != nil {
 			log.Error(err, "Failed to get FalconContainerSensor resource")
 			return err
@@ -447,7 +447,7 @@ func (r *FalconDeploymentReconciler) create(ctx context.Context, log logr.Logger
 		}
 		// gvk := t.GetObjectKind().GroupVersionKind()
 		log.Info(fmt.Sprintf("Creating %s %s in namespace %s", gvk.Kind, name, namespace))
-		err = r.Client.Create(ctx, t)
+		err = r.Create(ctx, t)
 		if err != nil {
 			if apierrors.IsAlreadyExists(err) {
 				log.Info(fmt.Sprintf("Falcon %s %s already exists in namespace %s", gvk.Kind, name, namespace))
@@ -480,7 +480,7 @@ func (r *FalconDeploymentReconciler) update(ctx context.Context, log logr.Logger
 		namespace := t.GetNamespace()
 		gvk := t.GetObjectKind().GroupVersionKind()
 		log.Info(fmt.Sprintf("Updating %s %s in namespace %s", gvk.Kind, name, namespace))
-		err := r.Client.Update(ctx, t)
+		err := r.Update(ctx, t)
 		if err != nil {
 			if apierrors.IsNotFound(err) {
 				log.Info(fmt.Sprintf("%s %s does not exist in namespace %s", gvk.Kind, name, namespace))
@@ -512,7 +512,7 @@ func (r *FalconDeploymentReconciler) delete(ctx context.Context, log logr.Logger
 		namespace := t.GetNamespace()
 		gvk := t.GetObjectKind().GroupVersionKind()
 		log.Info(fmt.Sprintf("Deleting %s %s in namespace %s", gvk.Kind, name, namespace))
-		err := r.Client.Delete(ctx, t)
+		err := r.Delete(ctx, t)
 		if err != nil {
 			if apierrors.IsNotFound(err) {
 				log.Info(fmt.Sprintf("%s object %s does not exist in namespace %s", gvk.Kind, name, namespace))

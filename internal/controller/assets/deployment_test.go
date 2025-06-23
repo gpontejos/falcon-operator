@@ -44,7 +44,7 @@ func TestAdmissionDeployment(t *testing.T) {
 	falconAdmission.Spec.AdmissionConfig.Replicas = &port
 	falconAdmission.Spec.AdmissionConfig.ContainerPort = &port
 
-	var deployWatcher *bool = new(bool)
+	var deployWatcher = new(bool)
 	*deployWatcher = false
 	falconAdmission.Spec.AdmissionConfig.DeployWatcher = deployWatcher
 	want := testAdmissionDeployment("test", "test", "test", "test", falconAdmission)
@@ -112,7 +112,7 @@ func testSideCarDeployment(name string, namespace string, component string, imag
 	runNonRoot := true
 	initRunAsNonRoot := false
 	initContainers := []corev1.Container{}
-	var registryCAConfigMapName string = ""
+	var registryCAConfigMapName = ""
 	labels := common.CRLabels("deployment", name, component)
 
 	if falconContainer.Spec.Injector.Resources != nil {

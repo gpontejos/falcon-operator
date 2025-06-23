@@ -1,6 +1,7 @@
 package gcp
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 )
@@ -17,7 +18,11 @@ func GetProjectID() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			fmt.Printf("Error closing pod logs: %v", err)
+		}
+	}()
 
 	body, err := io.ReadAll(resp.Body)
 	return string(body), err

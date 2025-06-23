@@ -25,7 +25,7 @@ func (r *FalconContainerReconciler) reconcileService(ctx context.Context, log lo
 	if err != nil {
 		if errors.IsNotFound(err) {
 			if err = ctrl.SetControllerReference(falconContainer, service, r.Scheme); err != nil {
-				return &corev1.Service{}, fmt.Errorf("unable to set controller reference on service %s: %v", service.ObjectMeta.Name, err)
+				return &corev1.Service{}, fmt.Errorf("unable to set controller reference on service %s: %v", service.Name, err)
 			}
 
 			return service, r.Create(ctx, log, falconContainer, service)

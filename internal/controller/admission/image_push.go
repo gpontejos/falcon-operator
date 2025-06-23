@@ -11,7 +11,7 @@ import (
 
 	falconv1alpha1 "github.com/crowdstrike/falcon-operator/api/falcon/v1alpha1"
 	"github.com/crowdstrike/falcon-operator/internal/controller/image"
-	"github.com/crowdstrike/falcon-operator/internal/errors"
+	internalErrors "github.com/crowdstrike/falcon-operator/internal/errors"
 	"github.com/crowdstrike/falcon-operator/pkg/aws"
 	"github.com/crowdstrike/falcon-operator/pkg/common"
 	"github.com/crowdstrike/falcon-operator/pkg/gcp"
@@ -52,7 +52,7 @@ func (r *FalconAdmissionReconciler) PushImage(ctx context.Context, log logr.Logg
 
 	tag, err := imageRefresher.Refresh(registryUri, falcon.KacSensor, version)
 	if err != nil {
-		return fmt.Errorf("Cannot push Falcon Admission Image: %v", err)
+		return fmt.Errorf("cannot push Falcon Admission Image: %v", err)
 	}
 
 	log.Info("Falcon Admission Controller Image pushed successfully", "Image.Tag", tag)
@@ -60,7 +60,7 @@ func (r *FalconAdmissionReconciler) PushImage(ctx context.Context, log logr.Logg
 
 	imageUri, err := r.imageUri(ctx, falconAdmission)
 	if err != nil {
-		return fmt.Errorf("Cannot identify Falcon Admission Image: %v", err)
+		return fmt.Errorf("cannot identify Falcon Admission Image: %v", err)
 	}
 
 	meta.SetStatusCondition(&falconAdmission.Status.Conditions, metav1.Condition{
@@ -75,12 +75,12 @@ func (r *FalconAdmissionReconciler) PushImage(ctx context.Context, log logr.Logg
 
 func (r *FalconAdmissionReconciler) verifyCrowdStrike(ctx context.Context, log logr.Logger, falconAdmission *falconv1alpha1.FalconAdmission) (bool, error) {
 	if _, err := r.setImageTag(ctx, falconAdmission); err != nil {
-		return false, fmt.Errorf("Cannot set Falcon Registry Tag: %s", err)
+		return false, fmt.Errorf("cannot set Falcon Registry Tag: %s", err)
 	}
 
 	imageUri, err := r.imageUri(ctx, falconAdmission)
 	if err != nil {
-		return false, fmt.Errorf("Cannot find Falcon Registry URI: %s", err)
+		return false, fmt.Errorf("cannot find Falcon Registry URI: %s", err)
 	}
 
 	condition := meta.IsStatusConditionPresentAndEqual(falconAdmission.Status.Conditions, falconv1alpha1.ConditionImageReady, metav1.ConditionTrue)
@@ -110,27 +110,27 @@ func (r *FalconAdmissionReconciler) registryUri(ctx context.Context, falconAdmis
 		}
 
 		if imageStream.Status.DockerImageRepository == "" {
-			return "", fmt.Errorf("Unable to find route to OpenShift on-cluster registry. Please verify that OpenShift on-cluster registry is up and running.")
+			return "", fmt.Errorf("unable to find route to OpenShift on-cluster registry. Please verify that OpenShift on-cluster registry is up and running")
 		}
 
 		return imageStream.Status.DockerImageRepository, nil
 	case falconv1alpha1.RegistryTypeGCR:
 		projectId, err := gcp.GetProjectID()
 		if err != nil {
-			return "", fmt.Errorf("Cannot get GCP Project ID: %v", err)
+			return "", fmt.Errorf("cannot get GCP Project ID: %v", err)
 		}
 
 		return "gcr.io/" + projectId + "/falcon-kac", nil
 	case falconv1alpha1.RegistryTypeECR:
 		repo, err := aws.UpsertECRRepo(ctx, "falcon-kac")
 		if err != nil {
-			return "", fmt.Errorf("Cannot get target docker URI for ECR repository: %v", err)
+			return "", fmt.Errorf("cannot get target docker URI for ECR repository: %v", err)
 		}
 
 		return *repo.RepositoryUri, nil
 	case falconv1alpha1.RegistryTypeACR:
 		if falconAdmission.Spec.Registry.AcrName == nil {
-			return "", fmt.Errorf("Cannot push Falcon Image locally to ACR. acr_name was not specified")
+			return "", fmt.Errorf("cannot push Falcon Image locally to ACR. acr_name was not specified")
 		}
 
 		return fmt.Sprintf("%s.azurecr.io/falcon-kac", *falconAdmission.Spec.Registry.AcrName), nil
@@ -142,7 +142,7 @@ func (r *FalconAdmissionReconciler) registryUri(ctx context.Context, falconAdmis
 
 		return falcon.FalconContainerSensorImageURI(cloud, falcon.KacSensor), nil
 	default:
-		return "", fmt.Errorf("Unrecognized registry type: %s", falconAdmission.Spec.Registry.Type)
+		return "", fmt.Errorf("unrecognized registry type: %s", falconAdmission.Spec.Registry.Type)
 	}
 }
 
@@ -174,7 +174,7 @@ func (r *FalconAdmissionReconciler) getImageTag(falconAdmission *falconv1alpha1.
 		return *falconAdmission.Status.Sensor, nil
 	}
 
-	return "", fmt.Errorf("Unable to get falcon admission container image version")
+	return "", fmt.Errorf("unable to get falcon admission container image version")
 }
 
 func (r *FalconAdmissionReconciler) setImageTag(ctx context.Context, falconAdmission *falconv1alpha1.FalconAdmission) (string, error) {

@@ -23,7 +23,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
-	"k8s.io/apimachinery/pkg/api/errors"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -86,7 +85,7 @@ func (r *FalconImageAnalyzerReconciler) Reconcile(ctx context.Context, req ctrl.
 	falconImageAnalyzer := &falconv1alpha1.FalconImageAnalyzer{}
 	err := r.Get(ctx, req.NamespacedName, falconImageAnalyzer)
 	if err != nil {
-		if errors.IsNotFound(err) {
+		if apierrors.IsNotFound(err) {
 			// If the custom resource is not found then, it usually means that it was deleted or not created
 			// In this way, we will stop the reconciliation
 			log.Info("FalconImageAnalyzer resource not found. Ignoring since object must be deleted")
@@ -400,7 +399,7 @@ func (r *FalconImageAnalyzerReconciler) reconcileImageStream(ctx context.Context
 
 func (r *FalconImageAnalyzerReconciler) reconcileNamespace(ctx context.Context, req ctrl.Request, log logr.Logger, falconImageAnalyzer *falconv1alpha1.FalconImageAnalyzer) error {
 	namespace := assets.Namespace(falconImageAnalyzer.Spec.InstallNamespace)
-	namespace.ObjectMeta.Labels = common.CRLabels("namespace", falconImageAnalyzer.Spec.InstallNamespace, common.FalconImageAnalyzer)
+	namespace.Labels = common.CRLabels("namespace", falconImageAnalyzer.Spec.InstallNamespace, common.FalconImageAnalyzer)
 	existingNamespace := &corev1.Namespace{}
 
 	err := common.GetNamespacedObject(ctx, r.Client, r.Reader, types.NamespacedName{Name: falconImageAnalyzer.Spec.InstallNamespace}, existingNamespace)

@@ -210,9 +210,9 @@ func CheckRunningPodLabels(r client.Reader, ctx context.Context, namespace strin
 	}
 
 	for _, pod := range podList.Items {
-		if pod.ObjectMeta.Labels != nil {
+		if pod.Labels != nil {
 			for k, v := range matchingLabels {
-				if pod.ObjectMeta.Labels[k] != v {
+				if pod.Labels[k] != v {
 					return false, nil
 				}
 			}

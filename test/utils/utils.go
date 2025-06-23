@@ -23,7 +23,7 @@ import (
 	"os/exec"
 	"strings"
 
-	. "github.com/onsi/ginkgo/v2" //nolint:golint,revive
+	. "github.com/onsi/ginkgo/v2" //nolint:golint,revive,staticcheck
 )
 
 const (
@@ -36,7 +36,7 @@ const (
 )
 
 func warnError(err error) {
-	fmt.Fprintf(GinkgoWriter, "warning: %v\n", err)
+	fmt.Fprintf(GinkgoWriter, "warning: %v\n", err) //nolint:errcheck
 }
 
 // InstallPrometheusOperator installs the prometheus Operator to be used to export the enabled metrics.
@@ -52,17 +52,23 @@ func InstallPrometheusOperator() error {
 func Run(cmd *exec.Cmd) ([]byte, error) {
 	dir, _ := GetProjectDir()
 	cmd.Dir = dir
-	fmt.Fprintf(GinkgoWriter, "running dir: %s\n", cmd.Dir)
+	if _, err := fmt.Fprintf(GinkgoWriter, "running dir: %s\n", cmd.Dir); err != nil {
+		return []byte{}, fmt.Errorf("failed with error: %v", err)
+	}
 
 	// To allow make commands be executed from the project directory which is subdir on SDK repo
 	// TODO:(user) You might not need the following code
 	if err := os.Chdir(cmd.Dir); err != nil {
-		fmt.Fprintf(GinkgoWriter, "chdir dir: %s\n", err)
+		if _, err := fmt.Fprintf(GinkgoWriter, "chdir dir: %s\n", err); err != nil {
+			return []byte{}, fmt.Errorf("failed with error: %v", err)
+		}
 	}
 
 	cmd.Env = append(os.Environ(), "GO111MODULE=on")
 	command := strings.Join(cmd.Args, " ")
-	fmt.Fprintf(GinkgoWriter, "running: %s\n", command)
+	if _, err := fmt.Fprintf(GinkgoWriter, "running: %s\n", command); err != nil {
+		return []byte{}, fmt.Errorf("failed with error: %v", err)
+	}
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return output, fmt.Errorf("%s failed with error: (%v) %s", command, err, string(output))
@@ -144,7 +150,7 @@ func GetProjectDir() (string, error) {
 	if err != nil {
 		return wd, err
 	}
-	wd = strings.Replace(wd, "/test/e2e", "", -1)
+	wd = strings.ReplaceAll(wd, "/test/e2e", "")
 	return wd, nil
 }
 
@@ -163,7 +169,7 @@ func ReplaceInFile(path, old, new string) error {
 	if !strings.Contains(string(b), old) {
 		return errors.New("unable to find the content to be replaced")
 	}
-	s := strings.Replace(string(b), old, new, -1)
+	s := strings.ReplaceAll(string(b), old, new)
 	err = os.WriteFile(path, []byte(s), info.Mode())
 	if err != nil {
 		return err

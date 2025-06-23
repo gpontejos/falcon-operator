@@ -596,13 +596,13 @@ func (r *FalconAdmissionReconciler) reconcileAdmissionDeployment(ctx context.Con
 				updated = true
 			}
 
-			if !reflect.DeepEqual(containers.LivenessProbe.ProbeHandler.HTTPGet.Port, existingDeployment.Spec.Template.Spec.Containers[i].LivenessProbe.ProbeHandler.HTTPGet.Port) {
-				existingDeployment.Spec.Template.Spec.Containers[i].LivenessProbe.ProbeHandler.HTTPGet.Port = containers.LivenessProbe.ProbeHandler.HTTPGet.Port
+			if !reflect.DeepEqual(containers.LivenessProbe.HTTPGet.Port, existingDeployment.Spec.Template.Spec.Containers[i].LivenessProbe.HTTPGet.Port) {
+				existingDeployment.Spec.Template.Spec.Containers[i].LivenessProbe.HTTPGet.Port = containers.LivenessProbe.HTTPGet.Port
 				updated = true
 			}
 
-			if !reflect.DeepEqual(containers.StartupProbe.ProbeHandler.HTTPGet.Port, existingDeployment.Spec.Template.Spec.Containers[i].StartupProbe.ProbeHandler.HTTPGet.Port) {
-				existingDeployment.Spec.Template.Spec.Containers[i].StartupProbe.ProbeHandler.HTTPGet.Port = containers.StartupProbe.ProbeHandler.HTTPGet.Port
+			if !reflect.DeepEqual(containers.StartupProbe.HTTPGet.Port, existingDeployment.Spec.Template.Spec.Containers[i].StartupProbe.HTTPGet.Port) {
+				existingDeployment.Spec.Template.Spec.Containers[i].StartupProbe.HTTPGet.Port = containers.StartupProbe.HTTPGet.Port
 				updated = true
 			}
 			if !reflect.DeepEqual(containers.Env, existingDeployment.Spec.Template.Spec.Containers[i].Env) {
@@ -692,7 +692,7 @@ func (r *FalconAdmissionReconciler) reconcileImageStream(ctx context.Context, re
 
 func (r *FalconAdmissionReconciler) reconcileNamespace(ctx context.Context, req ctrl.Request, log logr.Logger, falconAdmission *falconv1alpha1.FalconAdmission) error {
 	namespace := assets.Namespace(falconAdmission.Spec.InstallNamespace)
-	namespace.ObjectMeta.Labels = common.CRLabels("namespace", falconAdmission.Spec.InstallNamespace, common.FalconAdmissionController)
+	namespace.Labels = common.CRLabels("namespace", falconAdmission.Spec.InstallNamespace, common.FalconAdmissionController)
 	existingNamespace := &corev1.Namespace{}
 
 	err := common.GetNamespacedObject(ctx, r.Client, r.Reader, types.NamespacedName{Name: falconAdmission.Spec.InstallNamespace}, existingNamespace)

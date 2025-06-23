@@ -24,11 +24,11 @@ func RegistryToken(ctx context.Context, client *client.CrowdStrikeAPISpecificati
 	resources := payload.Resources
 	resourcesList := resources
 	if len(resourcesList) != 1 {
-		return "", fmt.Errorf("Expected to receive exactly one token, but got %d\n", len(resourcesList))
+		return "", fmt.Errorf("expected to receive exactly one token, but got %d", len(resourcesList))
 	}
 	valueString := *resourcesList[0].Token
 	if valueString == "" {
-		return "", fmt.Errorf("Received empty token")
+		return "", fmt.Errorf("received empty token")
 	}
 	return valueString, nil
 }
@@ -42,10 +42,10 @@ func CCID(ctx context.Context, client *client.CrowdStrikeAPISpecification) (stri
 	}
 	payload := response.GetPayload()
 	if err = falcon.AssertNoError(payload.Errors); err != nil {
-		return "", fmt.Errorf("Error reported when getting CCID from CrowdStrike Falcon API: %v", err)
+		return "", fmt.Errorf("error reported when getting CCID from CrowdStrike Falcon API: %v", err)
 	}
 	if len(payload.Resources) != 1 {
-		return "", fmt.Errorf("Failed to get CCID: Unexpected API response: %v", payload.Resources)
+		return "", fmt.Errorf("failed to get CCID: Unexpected API response: %v", payload.Resources)
 	}
 	return payload.Resources[0], nil
 

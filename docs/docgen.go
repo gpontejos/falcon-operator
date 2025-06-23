@@ -201,7 +201,7 @@ func createFileUsingTemplate(t *template.Template, filename string, data interfa
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer closeFile(f)
 
 	err = t.Execute(f, data)
 	if err != nil {
@@ -220,14 +220,14 @@ func copy(src, dst string) error {
 	if err != nil {
 		return err
 	}
-	defer source.Close()
+	defer closeFile(source)
 
 	log.Printf("Creating file: %s\n", dst)
 	destination, err := os.Create(dst) //#nosec
 	if err != nil {
 		return err
 	}
-	defer destination.Close()
+	defer closeFile(destination)
 
 	_, err = io.Copy(destination, source)
 	if err != nil {
@@ -240,5 +240,11 @@ func copy(src, dst string) error {
 func customFuncs() template.FuncMap {
 	return map[string]interface{}{
 		// Add custom functions here
+	}
+}
+
+func closeFile(f *os.File) {
+	if err := f.Close(); err != nil {
+		log.Printf("Error closing file: %v", err)
 	}
 }
