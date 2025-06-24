@@ -94,3 +94,16 @@ func (r *FalconAdmissionReconciler) newConfigMap(ctx context.Context, name strin
 
 	return assets.SensorConfigMap(name, falconAdmission.Spec.InstallNamespace, common.FalconAdmissionController, data), nil
 }
+
+func (r *FalconAdmissionReconciler) reconcileClusterNameConfigMap(ctx context.Context, req ctrl.Request, log logr.Logger, falconAdmission *falconv1alpha1.FalconAdmission) (bool, error) {
+	if falconAdmission.Spec.ClusterName == nil {
+		return false, nil
+	}
+	return r.reconcileGenericConfigMap(common.FalconAdmissionClusterNameConfigMapName, r.newClusterNameConfigMap, ctx, req, log, falconAdmission)
+}
+
+func (r *FalconAdmissionReconciler) newClusterNameConfigMap(ctx context.Context, name string, falconAdmission *falconv1alpha1.FalconAdmission) (*corev1.ConfigMap, error) {
+	data := map[string]string{}
+	data["ClusterName"] = *falconAdmission.Spec.ClusterName
+	return assets.SensorConfigMap(name, falconAdmission.Spec.InstallNamespace, common.FalconAdmissionController, data), nil
+}
