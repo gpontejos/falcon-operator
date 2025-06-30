@@ -14,6 +14,7 @@ import (
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	types "k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
@@ -105,5 +106,18 @@ func (r *FalconAdmissionReconciler) reconcileClusterNameConfigMap(ctx context.Co
 func (r *FalconAdmissionReconciler) newClusterNameConfigMap(ctx context.Context, name string, falconAdmission *falconv1alpha1.FalconAdmission) (*corev1.ConfigMap, error) {
 	data := map[string]string{}
 	data["ClusterName"] = *falconAdmission.Spec.ClusterName
+
+	// Check for configMap created by sensor
+	existingCM := &corev1.ConfigMap{}
+	err := common.GetNamespacedObject(ctx, r.Client, r.Reader, types.NamespacedName{Name: name, Namespace: falconAdmission.Spec.InstallNamespace}, existingCM)
+	if err != nil {
+		existingCM.Data = data
+		existingCM.TypeMeta = metav1.TypeMeta{
+			APIVersion: corev1.SchemeGroupVersion.String(),
+			Kind:       "ConfigMap",
+		}
+		return existingCM, nil
+	}
+
 	return assets.SensorConfigMap(name, falconAdmission.Spec.InstallNamespace, common.FalconAdmissionController, data), nil
 }
