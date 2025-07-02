@@ -1,0 +1,229 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "falcon-operator.fullname" . }}-manager-role
+  labels:
+  {{- include "falcon-operator.labels" . | nindent 4 }}
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - cronjobs
+  - daemonsets
+  - ingresses
+  - jobs
+  - nodes
+  - persistentvolumes
+  - replicasets
+  - replicationcontrollers
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - deployments
+  - namespaces
+  - resourcequotas
+  - secrets
+  - serviceaccounts
+  - services
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - delete
+  - deletecollection
+  - get
+  - list
+  - update
+  - watch
+- apiGroups:
+  - admissionregistration.k8s.io
+  resources:
+  - mutatingwebhookconfigurations
+  - validatingwebhookconfigurations
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - update
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - daemonsets
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - update
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - replicasets
+  - statefulsets
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - batch
+  resources:
+  - cronjobs
+  - jobs
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - coordination.k8s.io
+  resources:
+  - leases
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - update
+  - watch
+- apiGroups:
+  - falcon.crowdstrike.com
+  resources:
+  - falconadmissions
+  - falconcontainers
+  - falcondeployments
+  - falconimageanalyzers
+  - falconnodesensors
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - falcon.crowdstrike.com
+  resources:
+  - falconadmissions/finalizers
+  - falcondeployments/finalizers
+  - falconimageanalyzers/finalizers
+  - falconnodesensors/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - falcon.crowdstrike.com
+  resources:
+  - falconadmissions/status
+  - falconcontainers/finalizers
+  - falconcontainers/status
+  - falcondeployments/status
+  - falconimageanalyzers/status
+  - falconnodesensors/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - image.openshift.io
+  resources:
+  - imagestreams
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - update
+  - watch
+- apiGroups:
+  - rbac.authorization.k8s.io
+  resources:
+  - clusterrolebindings
+  - clusterroles
+  - rolebindings
+  - roles
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - update
+  - watch
+- apiGroups:
+  - scheduling.k8s.io
+  resources:
+  - priorityclasses
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - update
+  - watch
+- apiGroups:
+  - security.openshift.io
+  resourceNames:
+  - privileged
+  resources:
+  - securitycontextconstraints
+  verbs:
+  - use
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "falcon-operator.fullname" . }}-manager-rolebinding
+  labels:
+    crowdstrike.com/component: rbac
+    crowdstrike.com/created-by: falcon-operator
+    crowdstrike.com/instance: manager-rolebinding
+    crowdstrike.com/managed-by: kustomize
+    crowdstrike.com/name: clusterrolebinding
+    crowdstrike.com/part-of: Falcon
+    crowdstrike.com/provider: crowdstrike
+  {{- include "falcon-operator.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: '{{ include "falcon-operator.fullname" . }}-manager-role'
+subjects:
+- kind: ServiceAccount
+  name: '{{ include "falcon-operator.fullname" . }}-controller-manager'
+  namespace: '{{ .Release.Namespace }}'

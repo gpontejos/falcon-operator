@@ -1,0 +1,32 @@
+controllerManager:
+  manager:
+    args:
+    - --leader-elect
+    containerSecurityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
+      privileged: false
+    env:
+      operatorName: falcon-operator
+      watchNamespace: ""
+    image:
+      repository: quay.io/crowdstrike/falcon-operator
+      tag: 1.6.0
+    resources:
+      limits:
+        cpu: 500m
+        memory: 256Mi
+      requests:
+        cpu: 100m
+        memory: 64Mi
+  podSecurityContext:
+    fsGroup: 65534
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+  replicas: 1
+  serviceAccount:
+    annotations: {}
+kubernetesClusterDomain: cluster.local

@@ -318,3 +318,13 @@ catalog-push: ## Push a catalog image.
 .PHONY: non-olm
 non-olm: kustomize ## Generate non-olm deployment manifest
 	$(KUSTOMIZE) build config/non-olm -o deploy/falcon-operator.yaml
+
+HELMIFY ?= $(LOCALBIN)/helmify
+
+.PHONY: helmify
+helmify: $(HELMIFY) ## Download helmify locally if necessary.
+$(HELMIFY): $(LOCALBIN)
+	test -s $(LOCALBIN)/helmify || GOBIN=$(LOCALBIN) go install github.com/arttor/helmify/cmd/helmify@latest
+
+helm: manifests kustomize helmify
+	$(KUSTOMIZE) build config/non-olm | $(HELMIFY) -crd-dir helm-charts/falcon-operator
