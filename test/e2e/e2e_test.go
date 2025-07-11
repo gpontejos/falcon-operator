@@ -386,6 +386,55 @@ var _ = Describe("falcon", Ordered, func() {
 	})
 
 	Context("Falcon Admission Controller", func() {
+		It("should manage falcon-kac-meta configMap changes successfully", func() {
+			By("update with a clustom clusterName")
+			EventuallyWithOffset(1, func() error {
+				cmd := exec.Command("kubectl", "patch", "falconadmission", "falcon-admission",
+					"-p", "'{\"spec\":{\"clusterName\":\"test-cluster\"}}'")
+				_, err := utils.Run(cmd)
+				return err
+			}, defaultTimeout, defaultPollPeriod).Should(Succeed())
+
+			By("validate the cluster name in the falcon-kac-meta configMap has updated")
+			EventuallyWithOffset(1, func() error {
+				cmd := exec.Command("kubectl", "patch", "falconadmission", "falcon-admission",
+					"-p", "'{\"spec\":{\"clusterName\":\"test-cluster\"}}'")
+				_, err := utils.Run(cmd)
+				return err
+			}, defaultTimeout, defaultPollPeriod).Should(Succeed())
+
+			// kubectl get configmap falcon-kac-meta -n falcon-kac -o jsonpath='{.data.ClusterName}'
+			By("validate the cluster name in the falcon-kac-meta configMap has updated")
+			EventuallyWithOffset(1, func() error {
+				cmd := exec.Command("kubectl", "get", "configmap", "falcon-kac-meta",
+					"-n", namespace, "-o", "jsonpath='{.data.ClusterName}'")
+				output, err := utils.Run(cmd)
+				ExpectWithOffset(2, err).NotTo(HaveOccurred())
+				if !strings.Contains(string(output), "test-cluster") {
+					return fmt.Errorf("falcon-admission pod in %s status")
+				}
+				return nil
+			}, defaultTimeout, defaultPollPeriod).Should(Succeed())
+
+			By("validating that pod(s) status.phase!=Running")
+			getFalconAdmissionPodStatus := func() error {
+				cmd := exec.Command("kubectl", "get",
+					"pods", "-A", "-l", "crowdstrike.com/component=admission_controller", "--field-selector=status.phase=Running",
+					"-o", "jsonpath={.items[*].status}", "-n", namespace,
+				)
+				status, err := utils.Run(cmd)
+				fmt.Println(string(status))
+				ExpectWithOffset(2, err).NotTo(HaveOccurred())
+				if len(status) > 0 {
+					return fmt.Errorf("falcon-admission pod in %s status", status)
+				}
+				return nil
+			}
+			EventuallyWithOffset(1, getFalconAdmissionPodStatus, defaultTimeout, defaultPollPeriod).Should(Succeed())
+		})
+	})
+
+	Context("Falcon Admission Controller", func() {
 		It("should cleanup successfully", func() {
 			projectDir, _ := utils.GetProjectDir()
 
