@@ -128,6 +128,26 @@ test: manifests generate fmt vet envtest ## Run tests.
 test-e2e:
 	go test ./test/e2e/ -v -ginkgo.v -timeout 30m
 
+# Run e2e tests for KAC CRD only
+.PHONY: test-e2e-kac
+test-e2e-kac:
+	go test ./test/e2e/ -v -ginkgo.v -timeout 30m --ginkgo.focus="Falcon Operator|Falcon Admission Controller"
+
+# Run e2e tests for the Node Sensor CRD only
+.PHONY: test-e2e-sensor
+test-e2e-sensor:
+	go test ./test/e2e/ -v -ginkgo.v -timeout 30m --ginkgo.focus="Falcon Operator|Falcon Node Sensor"
+
+# Run e2e tests for the Sidecar Sensor CRD only
+.PHONY: test-e2e-sidecar
+test-e2e-sidecar:
+	go test ./test/e2e/ -v -ginkgo.v -timeout 30m --ginkgo.focus="Falcon Operator|Falcon Sidecar Sensor"
+
+# Run e2e tests for the Falcon Deployment CRD only
+.PHONY: test-e2e-deployment
+test-e2e-deployment:
+	go test ./test/e2e/ -v -ginkgo.v -timeout 30m --ginkgo.focus="Falcon Operator|Falcon Deployment"
+
 GOLANGCI_LINT = $(shell pwd)/bin/golangci-lint
 GOLANGCI_LINT_VERSION ?= v1.54.2
 golangci-lint:
