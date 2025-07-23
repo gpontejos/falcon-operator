@@ -289,7 +289,7 @@ func (r *FalconNodeSensorReconciler) Reconcile(ctx context.Context, req ctrl.Req
 			}
 		}
 
-		_, err = r.updateDaemonSetTolerations(ctx, ds, nodesensor, logger)
+		_, err = k8sutils.UpdateSpecTolerations(ctx, r, ds.Spec.Template.Spec.Tolerations, nodesensor, logger)
 		if err != nil {
 			return ctrl.Result{}, err
 		}
@@ -338,7 +338,7 @@ func (r *FalconNodeSensorReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		capabilities := updateDaemonSetCapabilities(dsUpdate, dsTarget, logger)
 		initArgs := updateDaemonSetInitArgs(dsUpdate, dsTarget, logger)
 		proxyUpdates := updateDaemonSetContainerProxy(dsUpdate, logger)
-		tolsUpdate, err := r.updateDaemonSetTolerations(ctx, dsUpdate, nodesensor, logger)
+		tolsUpdate, err := k8sutils.UpdateSpecTolerations(ctx, r, dsUpdate.Spec.Template.Spec.Tolerations, nodesensor, logger)
 		if err != nil {
 			return ctrl.Result{}, err
 		}
@@ -662,25 +662,6 @@ func updateDaemonSetContainerProxy(ds *appsv1.DaemonSet, logger logr.Logger) boo
 	}
 
 	return updated
-}
-
-// If an update is needed, this will update the tolerations from the given DaemonSet
-func (r *FalconNodeSensorReconciler) updateDaemonSetTolerations(ctx context.Context, ds *appsv1.DaemonSet, nodesensor *falconv1alpha1.FalconNodeSensor, logger logr.Logger) (bool, error) {
-	tolerations := &ds.Spec.Template.Spec.Tolerations
-	origTolerations := nodesensor.Spec.Node.Tolerations
-	tolerationsUpdate := !equality.Semantic.DeepEqual(*tolerations, *origTolerations)
-	if tolerationsUpdate {
-		logger.Info("Updating FalconNodeSensor DaemonSet Tolerations")
-		mergedTolerations := k8s_utils.MergeTolerations(*tolerations, *origTolerations)
-		*tolerations = mergedTolerations
-		nodesensor.Spec.Node.Tolerations = &mergedTolerations
-
-		if err := r.Update(ctx, nodesensor); err != nil {
-			logger.Error(err, "Failed to update FalconNodeSensor Tolerations")
-			return false, err
-		}
-	}
-	return tolerationsUpdate, nil
 }
 
 // If an update is needed, this will update the affinity from the given DaemonSet

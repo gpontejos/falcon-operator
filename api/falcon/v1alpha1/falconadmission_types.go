@@ -323,3 +323,7 @@ func (ac *FalconAdmission) GetFalconSpec() FalconSensor {
 func (ac *FalconAdmission) SetFalconSpec(falconSpec FalconSensor) {
 	ac.Spec.Falcon = falconSpec
 }
+
+func (node *FalconAdmission) Tolerations() *[]corev1.Toleration {
+	return nil
+}

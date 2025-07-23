@@ -21,8 +21,8 @@ import (
 	"k8s.io/apimachinery/pkg/api/equality"
 )
 
-func MergeTolerations(first, second []corev1.Toleration) []corev1.Toleration {
-	all := append(first, second...)
+func MergeTolerations(newToleations []corev1.Toleration, destinationTolerations *[]corev1.Toleration) {
+	all := append(newToleations, *destinationTolerations...)
 	var merged []corev1.Toleration
 
 next:
@@ -42,8 +42,7 @@ next:
 		}
 		merged = append(merged, t)
 	}
-
-	return merged
+	destinationTolerations = &merged
 }
 
 // isSuperset checks whether ss tolerates a superset of t.

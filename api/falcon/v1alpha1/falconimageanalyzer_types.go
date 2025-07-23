@@ -223,3 +223,7 @@ func (fia *FalconImageAnalyzer) GetFalconSpec() FalconSensor {
 func (fia *FalconImageAnalyzer) SetFalconSpec(FalconSensor) {
 	// noop
 }
+
+func (node *FalconImageAnalyzer) Tolerations() *[]corev1.Toleration {
+	return nil
+}

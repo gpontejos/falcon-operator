@@ -262,7 +262,7 @@ func Daemonset(dsName, image, serviceAccount string, node *falconv1alpha1.Falcon
 					// NodeSelector is set to linux until windows containers are supported for the Falcon sensor
 					NodeSelector:                  common.NodeSelector,
 					Affinity:                      nodeAffinity(node),
-					Tolerations:                   *node.GetTolerations(),
+					Tolerations:                   *node.Tolerations(),
 					HostPID:                       hostpid,
 					HostIPC:                       hostipc,
 					HostNetwork:                   hostnetwork,
@@ -366,7 +366,7 @@ func RemoveNodeDirDaemonset(dsName, image, serviceAccount string, node *falconv1
 					// NodeSelector is set to linux until windows containers are supported for the Falcon sensor
 					NodeSelector:                  common.NodeSelector,
 					Affinity:                      nodeAffinity(node),
-					Tolerations:                   *node.GetTolerations(),
+					Tolerations:                   *node.Tolerations(),
 					HostPID:                       hostpid,
 					TerminationGracePeriodSeconds: getTermGracePeriod(node),
 					ImagePullSecrets:              pullSecrets(node),
