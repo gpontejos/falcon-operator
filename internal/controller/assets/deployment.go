@@ -730,6 +730,7 @@ func AdmissionDeployment(name string, namespace string, component string, imageU
 					PriorityClassName:  common.FalconPriorityClassName,
 					Containers:         *kacContainers,
 					Volumes:            volumes,
+					Tolerations:        *falconAdmission.Tolerations(),
 				},
 			},
 		},

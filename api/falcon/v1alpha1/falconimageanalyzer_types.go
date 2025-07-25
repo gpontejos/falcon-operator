@@ -115,6 +115,12 @@ type FalconImageAnalyzerConfigSpec struct {
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Falcon Image Analyzer Enable Debugging",order=13
 	// +kubebuilder:default:=false
 	EnableDebug bool `json:"debug,omitempty"`
+
+	// Specifies tolerations for custom taints. Defaults to allowing scheduling on all nodes.
+	// +optional
+	// +kubebuilder:default:={{key: "node-role.kubernetes.io/master", operator: "Exists", effect: "NoSchedule"}, {key: "node-role.kubernetes.io/control-plane", operator: "Exists", effect: "NoSchedule"}, {key: "node-role.kubernetes.io/infra", operator: "Exists", effect: "NoSchedule"}}
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,order=13
+	Tolerations *[]corev1.Toleration `json:"tolerations"`
 }
 
 type FalconImageAnalyzerPriorityClass struct {
@@ -224,6 +230,6 @@ func (fia *FalconImageAnalyzer) SetFalconSpec(FalconSensor) {
 	// noop
 }
 
-func (node *FalconImageAnalyzer) Tolerations() *[]corev1.Toleration {
-	return nil
+func (fia *FalconImageAnalyzer) Tolerations() *[]corev1.Toleration {
+	return fia.Spec.ImageAnalyzerConfig.Tolerations
 }

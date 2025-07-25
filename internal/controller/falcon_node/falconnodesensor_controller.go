@@ -289,11 +289,6 @@ func (r *FalconNodeSensorReconciler) Reconcile(ctx context.Context, req ctrl.Req
 			}
 		}
 
-		_, err = k8sutils.UpdateSpecTolerations(ctx, r, ds.Spec.Template.Spec.Tolerations, nodesensor, logger)
-		if err != nil {
-			return ctrl.Result{}, err
-		}
-
 		err = r.Create(ctx, ds)
 		if err != nil {
 			logger.Error(err, "Failed to create new DaemonSet")
@@ -338,10 +333,7 @@ func (r *FalconNodeSensorReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		capabilities := updateDaemonSetCapabilities(dsUpdate, dsTarget, logger)
 		initArgs := updateDaemonSetInitArgs(dsUpdate, dsTarget, logger)
 		proxyUpdates := updateDaemonSetContainerProxy(dsUpdate, logger)
-		tolsUpdate, err := k8sutils.UpdateSpecTolerations(ctx, r, dsUpdate.Spec.Template.Spec.Tolerations, nodesensor, logger)
-		if err != nil {
-			return ctrl.Result{}, err
-		}
+		tolsUpdate := k8s_utils.ReconcileTolerations(*nodesensor.Tolerations(), &dsUpdate.Spec.Template.Spec.Tolerations)
 
 		// Update the daemonset and re-spin pods with changes
 		if imgUpdate || tolsUpdate || affUpdate || containerVolUpdate || volumeUpdates || resources || pc || capabilities || initArgs || initResources || proxyUpdates || updated {

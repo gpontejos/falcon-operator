@@ -13,6 +13,7 @@ import (
 	k8sutils "github.com/crowdstrike/falcon-operator/internal/controller/common"
 	"github.com/crowdstrike/falcon-operator/pkg/aws"
 	"github.com/crowdstrike/falcon-operator/pkg/common"
+	"github.com/crowdstrike/falcon-operator/pkg/k8s_utils"
 	"github.com/crowdstrike/falcon-operator/pkg/registry/pulltoken"
 	"github.com/crowdstrike/falcon-operator/version"
 	"github.com/go-logr/logr"
@@ -330,6 +331,10 @@ func (r *FalconImageAnalyzerReconciler) reconcileImageAnalyzerDeployment(ctx con
 
 	if !reflect.DeepEqual(existingDeployment.Spec.Template.Spec.Affinity.NodeAffinity, dep.Spec.Template.Spec.Affinity.NodeAffinity) {
 		existingDeployment.Spec.Template.Spec.Affinity.NodeAffinity = dep.Spec.Template.Spec.Affinity.NodeAffinity
+		updated = true
+	}
+
+	if k8s_utils.ReconcileTolerations(*falconImageAnalyzer.Tolerations(), &existingDeployment.Spec.Template.Spec.Tolerations) {
 		updated = true
 	}
 

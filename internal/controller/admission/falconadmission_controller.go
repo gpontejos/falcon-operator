@@ -13,6 +13,7 @@ import (
 	k8sutils "github.com/crowdstrike/falcon-operator/internal/controller/common"
 	"github.com/crowdstrike/falcon-operator/pkg/aws"
 	"github.com/crowdstrike/falcon-operator/pkg/common"
+	"github.com/crowdstrike/falcon-operator/pkg/k8s_utils"
 	"github.com/crowdstrike/falcon-operator/pkg/registry/pulltoken"
 	"github.com/crowdstrike/falcon-operator/pkg/tls"
 	"github.com/crowdstrike/falcon-operator/version"
@@ -264,7 +265,7 @@ func (r *FalconAdmissionReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		return ctrl.Result{}, err
 	}
 
-	err = r.reconcileAdmissionDeployment(ctx, req, log, falconAdmission)
+	deploymentUpdated, err := r.reconcileAdmissionDeployment(ctx, req, log, falconAdmission)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
@@ -279,7 +280,7 @@ func (r *FalconAdmissionReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
 	}
 
-	if configUpdated || serviceUpdated || webhookUpdated {
+	if configUpdated || serviceUpdated || webhookUpdated || deploymentUpdated {
 		err = r.admissionDeploymentUpdate(ctx, req, log, falconAdmission)
 		if err != nil {
 			return ctrl.Result{}, err
@@ -501,10 +502,10 @@ func (r *FalconAdmissionReconciler) reconcileAdmissionValidatingWebHook(ctx cont
 	return false, nil
 }
 
-func (r *FalconAdmissionReconciler) reconcileAdmissionDeployment(ctx context.Context, req ctrl.Request, log logr.Logger, falconAdmission *falconv1alpha1.FalconAdmission) error {
+func (r *FalconAdmissionReconciler) reconcileAdmissionDeployment(ctx context.Context, req ctrl.Request, log logr.Logger, falconAdmission *falconv1alpha1.FalconAdmission) (changed bool, err error) {
 	imageUri, err := r.imageUri(ctx, falconAdmission)
 	if err != nil {
-		return fmt.Errorf("unable to determine falcon container image URI: %v", err)
+		return false, fmt.Errorf("unable to determine falcon container image URI: %v", err)
 	}
 
 	if falconAdmission.Spec.AdmissionConfig.ContainerPort == nil {
@@ -526,13 +527,13 @@ func (r *FalconAdmissionReconciler) reconcileAdmissionDeployment(ctx context.Con
 	if err != nil && apierrors.IsNotFound(err) {
 		err = k8sutils.Create(r.Client, r.Scheme, ctx, req, log, falconAdmission, &falconAdmission.Status, dep)
 		if err != nil {
-			return err
+			return false, err
 		}
 
-		return nil
+		return true, nil
 	} else if err != nil {
 		log.Error(err, "Failed to get FalconAdmission Deployment")
-		return err
+		return false, err
 	}
 
 	if len(proxy.ReadProxyVarsFromEnv()) > 0 {
@@ -593,6 +594,10 @@ func (r *FalconAdmissionReconciler) reconcileAdmissionDeployment(ctx context.Con
 		updated = true
 	}
 
+	if k8s_utils.ReconcileTolerations(*falconAdmission.Tolerations(), &existingDeployment.Spec.Template.Spec.Tolerations) {
+		updated = true
+	}
+
 	if len(dep.Spec.Template.Spec.Containers) != len(existingDeployment.Spec.Template.Spec.Containers) {
 		existingDeployment.Spec.Template.Spec.Containers = dep.Spec.Template.Spec.Containers
 		updated = true
@@ -618,14 +623,16 @@ func (r *FalconAdmissionReconciler) reconcileAdmissionDeployment(ctx context.Con
 			}
 		}
 	}
-
+	log.Info("Existing Deployment", "tolerations", existingDeployment.Spec.Template.Spec.Tolerations)
+	log.Info("Current tolerations in spec", "tolerations", *falconAdmission.Tolerations())
+	log.Info("Updated flag", "updated", updated)
 	if updated {
 		if err := k8sutils.Update(r.Client, ctx, req, log, falconAdmission, &falconAdmission.Status, existingDeployment); err != nil {
-			return err
+			return true, err
 		}
 	}
 
-	return nil
+	return false, nil
 }
 
 func (r *FalconAdmissionReconciler) reconcileRegistrySecret(ctx context.Context, req ctrl.Request, log logr.Logger, falconAdmission *falconv1alpha1.FalconAdmission) error {

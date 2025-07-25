@@ -2,15 +2,11 @@ package common
 
 import (
 	"context"
-	"fmt"
 
 	falconv1alpha1 "github.com/crowdstrike/falcon-operator/api/falcon/v1alpha1"
 	"github.com/crowdstrike/falcon-operator/pkg/common"
 	"github.com/crowdstrike/falcon-operator/pkg/falcon_secret"
-	"github.com/crowdstrike/falcon-operator/pkg/k8s_utils"
-	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -59,26 +55,27 @@ func InjectFalconSecretData[T FalconReconciler[T], U FalconCRD](
 	return nil
 }
 
-// ReconcileDaemonsetTolerations merges new tolerations into the existing tolerations of a Falcon CRD.
+// UpdateSpecTolerations merges tolerations from the reconcile request into the existing tolerations
+// of a Falcon CRD. This is needed because the GKE Autopilot mutating webhook adds tolerations when deployed.
 // It updates the CRD if there are changes and returns whether an update occurred and any error encountered.
-func UpdateSpecTolerations[T FalconReconciler[T], U FalconCRD](
-	ctx context.Context,
-	reconciler T,
-	newTolerations []corev1.Toleration,
-	falconCrd U,
-	logger logr.Logger,
-) (changed bool, err error) {
-	client := reconciler.GetK8sClient()
-	tolerations := falconCrd.Tolerations()
-	changed = !equality.Semantic.DeepEqual(newTolerations, *tolerations)
-	if changed {
-		logger.Info(fmt.Sprintf("Updating %T Tolerations", falconCrd))
-		k8s_utils.MergeTolerations(newTolerations, tolerations)
+// func UpdateSpecTolerations[T FalconReconciler[T], U FalconCRD](
+// 	ctx context.Context,
+// 	reconciler T,
+// 	resourceTolerations []corev1.Toleration,
+// 	falconCrd U,
+// 	logger logr.Logger,
+// ) (changed bool, err error) {
+// 	client := reconciler.GetK8sClient()
+// 	tolerations := falconCrd.Tolerations()
+// 	changed = !equality.Semantic.DeepEqual(resourceTolerations, *tolerations)
+// 	if changed {
+// 		logger.Info(fmt.Sprintf("Updating %T Tolerations", falconCrd))
+// 		k8s_utils.MergeTolerations(resourceTolerations, tolerations)
 
-		if err := client.Update(ctx, falconCrd); err != nil {
-			logger.Error(err, fmt.Sprintf("Failed to update %T Tolerations", falconCrd))
-			return false, err
-		}
-	}
-	return changed, nil
-}
+// 		if err := client.Update(ctx, falconCrd); err != nil {
+// 			logger.Error(err, fmt.Sprintf("Failed to update %T Tolerations", falconCrd))
+// 			return false, err
+// 		}
+// 	}
+// 	return changed, nil
+// }

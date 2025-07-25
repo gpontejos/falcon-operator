@@ -190,6 +190,12 @@ type FalconAdmissionConfigSpec struct {
 	// Specifies node affinity for scheduling the Admission Controller.
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,order=18
 	NodeAffinity *corev1.NodeAffinity `json:"nodeAffinity,omitempty"`
+
+	// Specifies tolerations for custom taints. Defaults to allowing scheduling on all nodes.
+	// +optional
+	// +kubebuilder:default:={{key: "node-role.kubernetes.io/master", operator: "Exists", effect: "NoSchedule"}, {key: "node-role.kubernetes.io/control-plane", operator: "Exists", effect: "NoSchedule"}, {key: "node-role.kubernetes.io/infra", operator: "Exists", effect: "NoSchedule"}}
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,order=19
+	Tolerations *[]corev1.Toleration `json:"tolerations"`
 }
 
 type FalconAdmissionServiceAccount struct {
@@ -324,6 +330,6 @@ func (ac *FalconAdmission) SetFalconSpec(falconSpec FalconSensor) {
 	ac.Spec.Falcon = falconSpec
 }
 
-func (node *FalconAdmission) Tolerations() *[]corev1.Toleration {
-	return nil
+func (ac *FalconAdmission) Tolerations() *[]corev1.Toleration {
+	return ac.Spec.AdmissionConfig.Tolerations
 }

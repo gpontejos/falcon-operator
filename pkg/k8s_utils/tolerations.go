@@ -17,13 +17,15 @@ package k8s_utils
 
 /* Code from kubernetes project for merging tolerations */
 import (
+	"reflect"
+
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
 )
 
-func MergeTolerations(newToleations []corev1.Toleration, destinationTolerations *[]corev1.Toleration) {
-	all := append(newToleations, *destinationTolerations...)
+func mergeTolerations(newToleations []corev1.Toleration, destinationTolerations *[]corev1.Toleration) {
 	var merged []corev1.Toleration
+	all := append(newToleations, *destinationTolerations...)
 
 next:
 	for i, t := range all {
@@ -42,7 +44,7 @@ next:
 		}
 		merged = append(merged, t)
 	}
-	destinationTolerations = &merged
+	*destinationTolerations = merged
 }
 
 // isSuperset checks whether ss tolerates a superset of t.
@@ -82,3 +84,29 @@ func isSuperset(ss, t corev1.Toleration) bool {
 }
 
 /* End code from kubernetes project for merging tolerations */
+
+// compareTolerations checks if all tolerations in the 'first' slice are present in the 'second' slice.
+// It returns true if all tolerations in 'first' are found in 'second', false otherwise.
+func compareTolerations(first, second []corev1.Toleration) bool {
+	for _, t1 := range first {
+		found := false
+		for _, t2 := range second {
+			if reflect.DeepEqual(&t1, &t2) {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return false
+		}
+	}
+	return true
+}
+
+// ReconcileTolerations merges the tolerations from the CRD object tolerations into an existing object's
+// Tolerations. This is needed because the GKE Autopilot mutating webhook adds tolerations when deployed.
+func ReconcileTolerations(newToleations []corev1.Toleration, destinationTolerations *[]corev1.Toleration) (changed bool) {
+	changed = !compareTolerations(newToleations, *destinationTolerations)
+	mergeTolerations(newToleations, destinationTolerations)
+	return changed
+}
