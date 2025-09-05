@@ -271,6 +271,44 @@ func (r *FalconNodeSensorReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		return ctrl.Result{}, err
 	}
 
+	// Running Cleanup DaemonSet Only
+	if nodesensor.Spec.Node.CleanupOnly {
+		// Check if the daemonset already exists, if not create a new one
+		daemonset := &appsv1.DaemonSet{}
+		err = common.GetNamespacedObject(ctx, r.Client, r.Reader, types.NamespacedName{Name: nodesensor.Name, Namespace: nodesensor.Spec.InstallNamespace}, daemonset)
+		if err != nil && errors.IsNotFound(err) {
+			dsCleanupName := nodesensor.Name + "-cleanup"
+			cleanupDaemonset := &appsv1.DaemonSet{}
+
+			cleanupDaemonsetName := types.NamespacedName{
+				Name:      dsCleanupName,
+				Namespace: nodesensor.Spec.InstallNamespace,
+			}
+
+			if err := common.GetNamespacedObject(ctx, r.Client, r.Reader, cleanupDaemonsetName, cleanupDaemonset); err != nil && errors.IsNotFound(err) {
+				ds := assets.RemoveNodeDirDaemonset(dsCleanupName, image, serviceAccount, nodesensor)
+				// Create the cleanup DS
+				err = r.Create(ctx, ds)
+				if err != nil {
+					logger.Error(err, "Failed to create the Cleanup DaemonSet", "Path", common.FalconHostInstallDir)
+					return ctrl.Result{}, err
+				}
+			}
+
+			err = r.conditionsUpdate(falconv1alpha1.ConditionSuccess,
+				metav1.ConditionTrue,
+				falconv1alpha1.ReasonInstallSucceeded,
+				"FalconNodeSensor installation completed - Cleanup DaemonSet Only",
+				ctx, req.NamespacedName, nodesensor, logger)
+			if err != nil {
+				return ctrl.Result{}, err
+			}
+
+			return ctrl.Result{}, nil
+		}
+		logger.Info("node.cleanupOnly should not be used when the sensor daemonset is currently deployed. node.cleanupOnly will be ignored.")
+	}
+
 	// Check if the daemonset already exists, if not create a new one
 	daemonset := &appsv1.DaemonSet{}
 

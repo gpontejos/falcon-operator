@@ -210,6 +210,10 @@ spec:
                     - kernel
                     - bpf
                     type: string
+                  cleanupOnly:
+                    default: false
+                    description: Run cleanup daemonset only.
+                    type: boolean
                   disableCleanup:
                     default: false
                     description: |-
@@ -492,7 +496,7 @@ spec:
                     properties:
                       limits:
                         description: Sets the resource limits for the DaemonSet Sensor.
-                          Only applies when using the eBPF backend.
+                          Only applies when 1using the eBPF backend.
                         properties:
                           cpu:
                             description: Minimum allowed is 250m.

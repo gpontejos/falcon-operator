@@ -7350,6 +7350,10 @@ spec:
                         - kernel
                         - bpf
                         type: string
+                      cleanupOnly:
+                        default: false
+                        description: Run cleanup daemonset only
+                        type: boolean
                       disableCleanup:
                         default: false
                         description: |-
@@ -8794,6 +8798,10 @@ spec:
                     - kernel
                     - bpf
                     type: string
+                  cleanupOnly:
+                    default: false
+                    description: Run cleanup daemonset only
+                    type: boolean
                   disableCleanup:
                     default: false
                     description: |-

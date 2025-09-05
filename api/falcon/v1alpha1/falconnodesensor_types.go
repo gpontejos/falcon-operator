@@ -124,6 +124,11 @@ type FalconNodeSensorConfig struct {
 	// For more information, please see https://github.com/CrowdStrike/falcon-operator/blob/main/docs/ADVANCED.md.
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="DaemonSet Advanced Settings"
 	Advanced FalconAdvanced `json:"advanced,omitempty"`
+
+	// Run cleanup daemonset only.
+	// +kubebuilder:default=false
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,order=3
+	CleanupOnly bool `json:"cleanupOnly,omitempty"`
 }
 
 type PriorityClassConfig struct {
@@ -141,7 +146,7 @@ type PriorityClassConfig struct {
 }
 
 type Resources struct {
-	// Sets the resource limits for the DaemonSet Sensor. Only applies when using the eBPF backend.
+	// Sets the resource limits for the DaemonSet Sensor. Only applies when 1using the eBPF backend.
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
 	Limits ResourceList `json:"limits,omitempty"`
 
