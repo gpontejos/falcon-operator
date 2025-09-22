@@ -51,6 +51,8 @@ func (r *FalconImageAnalyzerReconciler) reconcileServiceAccount(ctx context.Cont
 		return err
 	}
 
+	log.Info("Existing service account before deep equal", "existingServiceAccount", existingServiceAccount)
+
 	if !reflect.DeepEqual(serviceAccount.ObjectMeta.Annotations, existingServiceAccount.ObjectMeta.Annotations) {
 		existingServiceAccount.ObjectMeta.Annotations = serviceAccount.ObjectMeta.Annotations
 		update = true
@@ -59,6 +61,8 @@ func (r *FalconImageAnalyzerReconciler) reconcileServiceAccount(ctx context.Cont
 		existingServiceAccount.ObjectMeta.Labels = serviceAccount.ObjectMeta.Labels
 		update = true
 	}
+
+	log.Info("Existing service account after deep equal", "existingServiceAccount", existingServiceAccount)
 
 	if update {
 		err = k8sutils.Update(r.Client, ctx, req, log, falconImageAnalyzer, &falconImageAnalyzer.Status, existingServiceAccount)

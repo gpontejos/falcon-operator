@@ -31,7 +31,9 @@ import (
 	"k8s.io/client-go/util/retry"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 )
 
 // FalconImageAnalyzerReconciler reconciles a FalconImageAnalyzer object
@@ -43,6 +45,7 @@ type FalconImageAnalyzerReconciler struct {
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *FalconImageAnalyzerReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	setupLog := ctrl.Log.WithName("iar-controller-test-log")
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&falconv1alpha1.FalconImageAnalyzer{}).
 		Owns(&corev1.Namespace{}).
@@ -51,6 +54,23 @@ func (r *FalconImageAnalyzerReconciler) SetupWithManager(mgr ctrl.Manager) error
 		Owns(&appsv1.Deployment{}).
 		Owns(&corev1.ServiceAccount{}).
 		Owns(&rbacv1.ClusterRoleBinding{}).
+		WithEventFilter(predicate.Funcs{
+			UpdateFunc: func(e event.UpdateEvent) bool {
+				oldObj, oldOk := e.ObjectOld.(*falconv1alpha1.FalconImageAnalyzer)
+				newObj, newOk := e.ObjectNew.(*falconv1alpha1.FalconImageAnalyzer)
+
+				if !oldOk || !newOk {
+					return false
+				}
+
+				if oldObj.Generation != newObj.Generation {
+					setupLog.Info("Spec changed", "resource", newObj.Name, "oldSpec", oldObj.Spec, "newSpec", newObj.Spec)
+					return true
+				}
+
+				return false
+			},
+		}).
 		Complete(r)
 }
 
@@ -304,31 +324,37 @@ func (r *FalconImageAnalyzerReconciler) reconcileImageAnalyzerDeployment(ctx con
 	}
 
 	if !reflect.DeepEqual(dep.Spec.Template.Spec.Containers[0].Image, existingDeployment.Spec.Template.Spec.Containers[0].Image) {
+		log.Info("Image Updated")
 		existingDeployment.Spec.Template.Spec.Containers[0].Image = dep.Spec.Template.Spec.Containers[0].Image
 		updated = true
 	}
 
 	if !reflect.DeepEqual(dep.Spec.Template.Spec.Containers[0].ImagePullPolicy, existingDeployment.Spec.Template.Spec.Containers[0].ImagePullPolicy) {
+		log.Info("ImagePullPolicy Updated")
 		existingDeployment.Spec.Template.Spec.Containers[0].ImagePullPolicy = dep.Spec.Template.Spec.Containers[0].ImagePullPolicy
 		updated = true
 	}
 
 	if !reflect.DeepEqual(dep.Spec.Template.Spec.ImagePullSecrets, existingDeployment.Spec.Template.Spec.ImagePullSecrets) {
+		log.Info("ImagePullSecrets Updated")
 		existingDeployment.Spec.Template.Spec.ImagePullSecrets = dep.Spec.Template.Spec.ImagePullSecrets
 		updated = true
 	}
 
 	if !reflect.DeepEqual(dep.Spec.Template.Spec.Containers[0].Ports, existingDeployment.Spec.Template.Spec.Containers[0].Ports) {
+		log.Info("Ports Updated")
 		existingDeployment.Spec.Template.Spec.Containers[0].Ports = dep.Spec.Template.Spec.Containers[0].Ports
 		updated = true
 	}
 
 	if !reflect.DeepEqual(existingDeployment.Spec.Strategy.RollingUpdate, dep.Spec.Strategy.RollingUpdate) {
+		log.Info("RollingUpdate Updated")
 		existingDeployment.Spec.Strategy.RollingUpdate = dep.Spec.Strategy.RollingUpdate
 		updated = true
 	}
 
 	if !reflect.DeepEqual(existingDeployment.Spec.Template.Spec.Affinity.NodeAffinity, dep.Spec.Template.Spec.Affinity.NodeAffinity) {
+		log.Info("NodeAffinity Updated")
 		existingDeployment.Spec.Template.Spec.Affinity.NodeAffinity = dep.Spec.Template.Spec.Affinity.NodeAffinity
 		updated = true
 	}

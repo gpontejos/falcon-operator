@@ -50,8 +50,10 @@ func (r *FalconImageAnalyzerReconciler) reconcileGenericConfigMap(name string, g
 		return false, err
 	}
 
+	log.Info("Existing configMap before deep equal", "existingCM", existingCM)
 	if !reflect.DeepEqual(cm.Data, existingCM.Data) {
 		existingCM.Data = cm.Data
+		log.Info("Existing configMap after deep equal", "existingCM", existingCM)
 		if err := k8sutils.Update(r.Client, ctx, req, log, falconImageAnalyzer, &falconImageAnalyzer.Status, existingCM); err != nil {
 			return false, err
 		}
