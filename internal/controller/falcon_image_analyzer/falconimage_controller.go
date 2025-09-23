@@ -31,9 +31,7 @@ import (
 	"k8s.io/client-go/util/retry"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/log"
-	"sigs.k8s.io/controller-runtime/pkg/predicate"
 )
 
 // FalconImageAnalyzerReconciler reconciles a FalconImageAnalyzer object
@@ -45,7 +43,6 @@ type FalconImageAnalyzerReconciler struct {
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *FalconImageAnalyzerReconciler) SetupWithManager(mgr ctrl.Manager) error {
-	setupLog := ctrl.Log.WithName("iar-controller-test-log")
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&falconv1alpha1.FalconImageAnalyzer{}).
 		Owns(&corev1.Namespace{}).
@@ -54,23 +51,6 @@ func (r *FalconImageAnalyzerReconciler) SetupWithManager(mgr ctrl.Manager) error
 		Owns(&appsv1.Deployment{}).
 		Owns(&corev1.ServiceAccount{}).
 		Owns(&rbacv1.ClusterRoleBinding{}).
-		WithEventFilter(predicate.Funcs{
-			UpdateFunc: func(e event.UpdateEvent) bool {
-				oldObj, oldOk := e.ObjectOld.(*falconv1alpha1.FalconImageAnalyzer)
-				newObj, newOk := e.ObjectNew.(*falconv1alpha1.FalconImageAnalyzer)
-
-				if !oldOk || !newOk {
-					return false
-				}
-
-				if oldObj.Generation != newObj.Generation {
-					setupLog.Info("Spec changed", "resource", newObj.Name, "oldSpec", oldObj.Spec, "newSpec", newObj.Spec)
-					return true
-				}
-
-				return false
-			},
-		}).
 		Complete(r)
 }
 
