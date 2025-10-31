@@ -75,9 +75,6 @@ CONTAINER_TOOL ?= docker
 
 # CONTAINER_BUILD_ARGS defines additional build arguments to pass to the $CONTAINER_TOOL during build.
 CONTAINER_BUILD_ARGS ?= --build-arg VERSION=$(VERSION) --build-arg GOPROXY=$(GOPROXY)
-ifneq ($(origin REGISTRY_URL), undefined)
-CONTAINER_BUILD_ARGS += --build-arg REGISTRY_URL=$(REGISTRY_URL)
-endif
 
 # Setting SHELL to bash allows bash commands to be executed by recipes.
 # Options are set to exit when a recipe line exits non-zero or a piped command fails.
