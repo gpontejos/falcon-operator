@@ -75,6 +75,7 @@ CONTAINER_TOOL ?= docker
 
 # CONTAINER_BUILD_ARGS defines additional build arguments to pass to the $CONTAINER_TOOL during build.
 CONTAINER_BUILD_ARGS ?= --build-arg VERSION=$(VERSION) --build-arg GOPROXY=$(GOPROXY)
+REGISTRY_URL ?= $(REGISTRY_URL)
 ifdef REGISTRY_URL
 CONTAINER_BUILD_ARGS += --build-arg REGISTRY_URL=$(REGISTRY_URL)
 endif
