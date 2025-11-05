@@ -43,6 +43,7 @@ spec:
           secretName: secret
         - namespace: test2
           secretName: secret2
+      autoDiscoverCredentials: false
   registry:
     type: acr
     acr_name: falcon-sensor-repo

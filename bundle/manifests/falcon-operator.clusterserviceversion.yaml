@@ -148,7 +148,7 @@ metadata:
     capabilities: Seamless Upgrades
     categories: Security,Monitoring
     containerImage: quay.io/crowdstrike/falcon-operator
-    createdAt: "2025-08-15T18:44:02Z"
+    createdAt: "2025-11-04T20:48:50Z"
     description: Falcon Operator installs CrowdStrike Falcon Sensors on the cluster
     features.operators.openshift.io/cnf: "false"
     features.operators.openshift.io/cni: "false"
@@ -721,10 +721,18 @@ spec:
           to ignore.
         displayName: Exclusions List
         path: falconImageAnalyzer.imageAnalyzerConfig.exclusions.registries
+      - description: HTTP port for the IAR Agent Service.
+        displayName: IAR Agent Service HTTP Port
+        path: falconImageAnalyzer.imageAnalyzerConfig.iarAgentService.httpPort
+      - description: |-
+          Namespace where Falcon Admission Controller (KAC) is installed within the same cluster.
+          Image Analyzer must know the namespace for KAC to enable inter-communication between IAR and KAC.
+        displayName: KAC Namespace
+        path: falconImageAnalyzer.imageAnalyzerConfig.kac.namespace
       - description: Name of the priority class to use.
         displayName: Name of the Priority Class to use
         path: falconImageAnalyzer.imageAnalyzerConfig.priorityClass.name
-      - description: If neceeary, configure the registry credentials for the Falcon
+      - description: If necessary, configure the registry credentials for the Falcon
           Image Analyzer.
         displayName: Registry Credentials
         path: falconImageAnalyzer.imageAnalyzerConfig.registryConfig.credentials
@@ -909,10 +917,17 @@ spec:
       - description: Configure a list of namespaces for Image Analyzer to ignore.
         displayName: Ignore Namespace List
         path: falconImageAnalyzer.imageAnalyzerConfig.exclusions.namespaces
+      - description: Auto update the certificates every time there is an update.
+        displayName: Auto Certificate Update
+        path: falconImageAnalyzer.imageAnalyzerConfig.iarAgentService.autoCertificateUpdate
       - displayName: Falcon Image Analyzer Image Pull Policy
         path: falconImageAnalyzer.imageAnalyzerConfig.imagePullPolicy
         x-descriptors:
         - urn:alm:descriptor:com.tectonic.ui:imagePullPolicy
+      - description: Enable auto-discovery of registry credentials from secrets in
+          the cluster.
+        displayName: Auto Discover Registry Credentials
+        path: falconImageAnalyzer.imageAnalyzerConfig.registryConfig.autoDiscoverCredentials
       - description: TLS configures TLS connection for push of Falcon Container image
           to the registry
         displayName: Registry TLS Configuration
@@ -1042,6 +1057,9 @@ spec:
       - description: Additional configuration for Falcon Image Analyzer deployment.
         displayName: Falcon Image Analyzer Configuration
         path: falconImageAnalyzer.imageAnalyzerConfig
+      - description: Certificate validity duration in number of days.
+        displayName: Certificate Expiration Days
+        path: falconImageAnalyzer.imageAnalyzerConfig.iarAgentService.certExpiration
       - description: ImagePullSecrets is an optional list of references to secrets
           to use for pulling image from the image location.
         displayName: Falcon Image Analyzer Image Pull Secrets
@@ -1143,6 +1161,12 @@ spec:
           from the API Key pair)
         displayName: Falcon Customer ID (CID)
         path: falconImageAnalyzer.falcon_api.cid
+      - description: |-
+          For custom DNS configurations when .svc requires a domain for services.
+          For example if service.my-namespace.svc doesn't resolve and the cluster uses
+          service.my-namespace.svc.testing.io, you would add testing.io as the value below.
+        displayName: Domain Name
+        path: falconImageAnalyzer.imageAnalyzerConfig.iarAgentService.domainName
       - displayName: Falcon Image Analyzer Resources
         path: falconImageAnalyzer.imageAnalyzerConfig.resources
         x-descriptors:
@@ -1428,6 +1452,14 @@ spec:
         - urn:alm:descriptor:com.tectonic.ui:resourceRequirements
       - displayName: Enable Alternate Mount Path
         path: falconContainerSensor.injector.alternateMountPath
+      - description: IAR Agent Service configuration for enabling communication between
+          IAR components.
+        displayName: IAR Agent Service Configuration
+        path: falconImageAnalyzer.imageAnalyzerConfig.iarAgentService
+      - description: IAR Agent Service configuration for enabling inter-communication
+          between Image Analyzer and Admission Controller.
+        displayName: KAC Inter-communication Configuration
+        path: falconImageAnalyzer.imageAnalyzerConfig.kac
       - description: Determines if snapshots of Kubernetes resources are periodically
           taken for cluster visibility.
         displayName: Enable Resource Snapshots
@@ -1529,10 +1561,18 @@ spec:
           to ignore.
         displayName: Exclusions List
         path: imageAnalyzerConfig.exclusions.registries
+      - description: HTTP port for the IAR Agent Service.
+        displayName: IAR Agent Service HTTP Port
+        path: imageAnalyzerConfig.iarAgentService.httpPort
+      - description: |-
+          Namespace where Falcon Admission Controller (KAC) is installed within the same cluster.
+          Image Analyzer must know the namespace for KAC to enable inter-communication between IAR and KAC.
+        displayName: KAC Namespace
+        path: imageAnalyzerConfig.kac.namespace
       - description: Name of the priority class to use.
         displayName: Name of the Priority Class to use
         path: imageAnalyzerConfig.priorityClass.name
-      - description: If neceeary, configure the registry credentials for the Falcon
+      - description: If necessary, configure the registry credentials for the Falcon
           Image Analyzer.
         displayName: Registry Credentials
         path: imageAnalyzerConfig.registryConfig.credentials
@@ -1586,10 +1626,17 @@ spec:
       - description: Configure a list of namespaces for Image Analyzer to ignore.
         displayName: Ignore Namespace List
         path: imageAnalyzerConfig.exclusions.namespaces
+      - description: Auto update the certificates every time there is an update.
+        displayName: Auto Certificate Update
+        path: imageAnalyzerConfig.iarAgentService.autoCertificateUpdate
       - displayName: Falcon Image Analyzer Image Pull Policy
         path: imageAnalyzerConfig.imagePullPolicy
         x-descriptors:
         - urn:alm:descriptor:com.tectonic.ui:imagePullPolicy
+      - description: Enable auto-discovery of registry credentials from secrets in
+          the cluster.
+        displayName: Auto Discover Registry Credentials
+        path: imageAnalyzerConfig.registryConfig.autoDiscoverCredentials
       - description: TLS configures TLS connection for push of Falcon Container image
           to the registry
         displayName: Registry TLS Configuration
@@ -1608,6 +1655,9 @@ spec:
       - description: Additional configuration for Falcon Image Analyzer deployment.
         displayName: Falcon Image Analyzer Configuration
         path: imageAnalyzerConfig
+      - description: Certificate validity duration in number of days.
+        displayName: Certificate Expiration Days
+        path: imageAnalyzerConfig.iarAgentService.certExpiration
       - description: ImagePullSecrets is an optional list of references to secrets
           to use for pulling image from the image location.
         displayName: Falcon Image Analyzer Image Pull Secrets
@@ -1628,6 +1678,12 @@ spec:
           from the API Key pair)
         displayName: Falcon Customer ID (CID)
         path: falcon_api.cid
+      - description: |-
+          For custom DNS configurations when .svc requires a domain for services.
+          For example if service.my-namespace.svc doesn't resolve and the cluster uses
+          service.my-namespace.svc.testing.io, you would add testing.io as the value below.
+        displayName: Domain Name
+        path: imageAnalyzerConfig.iarAgentService.domainName
       - displayName: Falcon Image Analyzer Resources
         path: imageAnalyzerConfig.resources
         x-descriptors:
@@ -1682,6 +1738,14 @@ spec:
       - description: Enable debugging for the Falcon Image Analyzer.
         displayName: Falcon Image Analyzer Enable Debugging
         path: imageAnalyzerConfig.debug
+      - description: IAR Agent Service configuration for enabling communication between
+          IAR components.
+        displayName: IAR Agent Service Configuration
+        path: imageAnalyzerConfig.iarAgentService
+      - description: IAR Agent Service configuration for enabling inter-communication
+          between Image Analyzer and Admission Controller.
+        displayName: KAC Inter-communication Configuration
+        path: imageAnalyzerConfig.kac
       version: v1alpha1
     - description: FalconNodeSensor is the Schema for the falconnodesensors API
       displayName: Falcon Node Sensor

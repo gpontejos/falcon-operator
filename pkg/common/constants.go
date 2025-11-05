@@ -22,6 +22,7 @@ const (
 	FalconServiceHTTPSPort                  = 443
 	FalconAdmissionValidatingWebhookName    = "validating.admission.falcon.crowdstrike.com"
 	FalconAdmissionClusterNameConfigMapName = "falcon-kac-meta"
+	FalconImageAnalyzerAgentService         = "iar-agent-service"
 
 	FalconInstanceNameKey    = "crowdstrike.com/name"
 	FalconInstanceKey        = "crowdstrike.com/instance"

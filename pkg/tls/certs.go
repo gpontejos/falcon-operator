@@ -7,6 +7,7 @@ import (
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/pem"
+	"fmt"
 	"math/big"
 	"time"
 )
@@ -109,4 +110,16 @@ func CertSetup(namespace string, days int, certInfo CertInfo) ([]byte, []byte, [
 		certPrivKeyPEM.Bytes(),
 		caPEM.Bytes(),
 		nil
+}
+
+func IsCertExpired(certPEM []byte) (bool, error) {
+	block, _ := pem.Decode(certPEM)
+	if block == nil {
+		return false, fmt.Errorf("failed to parse certificate PEM")
+	}
+	cert, err := x509.ParseCertificate(block.Bytes)
+	if err != nil {
+		return false, fmt.Errorf("failed to parse certificate: %v", err)
+	}
+	return time.Now().After(cert.NotAfter), nil
 }

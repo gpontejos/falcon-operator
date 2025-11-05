@@ -273,12 +273,25 @@ func ImageAnalyzerDeployment(name string, namespace string, component string, im
 				},
 			},
 		},
+		{
+			Name: name + "-tls-certs",
+			VolumeSource: corev1.VolumeSource{
+				Secret: &corev1.SecretVolumeSource{
+					SecretName: name + "-tls",
+				},
+			},
+		},
 	}
 
 	volumeMounts := []corev1.VolumeMount{
 		{
 			Name:      "tmp-volume",
 			MountPath: falconImageAnalyzer.Spec.ImageAnalyzerConfig.VolumeMountPath,
+		},
+		{
+			Name:      name + "-tls-certs",
+			MountPath: "/run/secrets/tls",
+			ReadOnly:  true,
 		},
 	}
 
@@ -344,6 +357,19 @@ func ImageAnalyzerDeployment(name string, namespace string, component string, im
 							Image:           imageUri,
 							ImagePullPolicy: falconImageAnalyzer.Spec.ImageAnalyzerConfig.ImagePullPolicy,
 							Args:            []string{"-runmode", "watcher"},
+							Ports: []corev1.ContainerPort{
+								{
+									ContainerPort: getIARAgentServicePort(falconImageAnalyzer),
+									Name:          "service-port",
+									Protocol:      corev1.ProtocolTCP,
+								},
+							},
+							Env: []corev1.EnvVar{
+								{
+									Name:  "__CS_KAC_NAMESPACE",
+									Value: falconImageAnalyzer.Spec.ImageAnalyzerConfig.KAC.Namespace,
+								},
+							},
 							EnvFrom: []corev1.EnvFromSource{
 								{
 									ConfigMapRef: &corev1.ConfigMapEnvSource{
@@ -857,4 +883,11 @@ func getNodeAffinity(nodeAffinity *corev1.NodeAffinity) *corev1.Affinity {
 			},
 		},
 	}
+}
+
+func getIARAgentServicePort(falconImageAnalyzer *falconv1alpha1.FalconImageAnalyzer) int32 {
+	if falconImageAnalyzer.Spec.ImageAnalyzerConfig.IARAgentService.HTTPPort != 0 {
+		return falconImageAnalyzer.Spec.ImageAnalyzerConfig.IARAgentService.HTTPPort
+	}
+	return 8001 // Default port
 }

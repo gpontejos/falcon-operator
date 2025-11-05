@@ -74,6 +74,9 @@ func (r *FalconImageAnalyzerReconciler) newConfigMap(ctx context.Context, name s
 		}
 	}
 
+	// AGENT_HELM_VERSION must be set to >= 1.0.17 for latest IAR features
+	data["AGENT_HELM_VERSION"] = "1.0.17"
+
 	if falconImageAnalyzer.Spec.FalconAPI.ClientId != "" {
 		data["AGENT_CLIENT_ID"] = falconImageAnalyzer.Spec.FalconAPI.ClientId
 	}
@@ -104,6 +107,16 @@ func (r *FalconImageAnalyzerReconciler) newConfigMap(ctx context.Context, name s
 	}
 
 	data["AGENT_DEBUG"] = strconv.FormatBool(falconImageAnalyzer.Spec.ImageAnalyzerConfig.EnableDebug)
+
+	// Registry auto-discovery configuration
+	data["SECRETS_AUTODISCOVER_ENABLED"] = strconv.FormatBool(falconImageAnalyzer.Spec.ImageAnalyzerConfig.RegistryConfig.AutoDiscoverCredentials)
+
+	// IAR Agent Service Port - required for IAR-KAC service communication
+	iarAgentServicePort := falconImageAnalyzer.Spec.ImageAnalyzerConfig.IARAgentService.HTTPPort
+	if iarAgentServicePort == 0 {
+		iarAgentServicePort = 8001
+	}
+	data["IAR_AGENT_SERVICE_PORT"] = strconv.Itoa(int(iarAgentServicePort))
 
 	data["IS_KUBERNETES"] = isKubernetes
 	data["AGENT_CID"] = cid

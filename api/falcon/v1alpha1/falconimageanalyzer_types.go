@@ -115,6 +115,16 @@ type FalconImageAnalyzerConfigSpec struct {
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Falcon Image Analyzer Enable Debugging",order=13
 	// +kubebuilder:default:=false
 	EnableDebug bool `json:"debug,omitempty"`
+
+	// IAR Agent Service configuration for enabling communication between IAR components.
+	// +kubebuilder:default:={}
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="IAR Agent Service Configuration",order=14
+	IARAgentService FalconImageAnalyzerAgentServiceSpec `json:"iarAgentService,omitempty"`
+
+	// IAR Agent Service configuration for enabling inter-communication between Image Analyzer and Admission Controller.
+	// +kubebuilder:default:={}
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="KAC Inter-communication Configuration",order=14
+	KAC FalconImageAnalyzerKACSpec `json:"kac,omitempty"`
 }
 
 type FalconImageAnalyzerPriorityClass struct {
@@ -135,6 +145,37 @@ type FalconImageAnalyzerUpdateStrategy struct {
 	RollingUpdate appsv1.RollingUpdateDeployment `json:"rollingUpdate,omitempty"`
 }
 
+type FalconImageAnalyzerAgentServiceSpec struct {
+	// HTTP port for the IAR Agent Service.
+	// +kubebuilder:default:=8001
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="IAR Agent Service HTTP Port",order=1
+	HTTPPort int32 `json:"httpPort,omitempty"`
+
+	// Auto update the certificates every time there is an update.
+	// +kubebuilder:default:=true
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Auto Certificate Update",order=2
+	AutoCertificateUpdate bool `json:"autoCertificateUpdate,omitempty"`
+
+	// Certificate validity duration in number of days.
+	// +kubebuilder:default:=3650
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Certificate Expiration Days",order=3
+	CertExpiration int32 `json:"certExpiration,omitempty"`
+
+	// For custom DNS configurations when .svc requires a domain for services.
+	// For example if service.my-namespace.svc doesn't resolve and the cluster uses
+	// service.my-namespace.svc.testing.io, you would add testing.io as the value below.
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Domain Name",order=4
+	DomainName string `json:"domainName,omitempty"`
+}
+
+type FalconImageAnalyzerKACSpec struct {
+	// Namespace where Falcon Admission Controller (KAC) is installed within the same cluster.
+	// Image Analyzer must know the namespace for KAC to enable inter-communication between IAR and KAC.
+	// +kubebuilder:default:=falcon-kac
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="KAC Namespace",order=1
+	Namespace string `json:"namespace,omitempty"`
+}
+
 type Exclusions struct {
 	// Configure a list of registries for the Falcon Image Analyzer to ignore.
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Exclusions List",order=1
@@ -146,9 +187,14 @@ type Exclusions struct {
 }
 
 type RegistryConfig struct {
-	// If neceeary, configure the registry credentials for the Falcon Image Analyzer.
+	// If necessary, configure the registry credentials for the Falcon Image Analyzer.
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Registry Credentials",order=1
 	Credentials []RegistryCreds `json:"credentials,omitempty"`
+
+	// Enable auto-discovery of registry credentials from secrets in the cluster.
+	// +kubebuilder:default:=true
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Auto Discover Registry Credentials",order=2
+	AutoDiscoverCredentials bool `json:"autoDiscoverCredentials,omitempty"`
 }
 
 type RegistryCreds struct {
